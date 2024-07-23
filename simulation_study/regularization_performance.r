@@ -1,5 +1,7 @@
-source("R/SDForest.r")
+library(SDForest)
 library(parallel)
+
+mc.cores <- 100
 
 p <- 500
 n <- 500
@@ -27,10 +29,10 @@ res_reg <- mclapply(1:N_rep, function(i){
 
     Q <- get_Q(data_test$X, 'trim')
 
-    fit <- SDForest(x = data$X, y = data$Y, cp = 0, multicore = F)
+    fit <- SDForest(x = data$X, y = data$Y, cp = 0)
 
     res <- lapply(cp_seq, function(cp){
-        pruned_object <- prune(fit, cp, oob = T)
+        pruned_object <- prune(fit, cp)
         pred <- predict(pruned_object, newdata = X_test)
         mse <- mean((pred - Y_test)^2)
         f_mse <- mean((pred - f_X_test)^2)
@@ -41,7 +43,7 @@ res_reg <- mclapply(1:N_rep, function(i){
     res <- do.call(rbind, res)
     res <- matrix(unlist(res), nrow = length(cp_seq), dimnames = list(NULL, colnames(res)))
     return(res)
-}, mc.cores = n_cores)
+}, mc.cores = mc.cores)
 print('done')
 
 save(res_reg, file = "simulation_study/results/regularization_performance.RData")

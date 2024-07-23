@@ -1,13 +1,15 @@
-source("R/SDForest.r")
+library(SDForest)
 library(ranger)
 library(parallel)
 
-performance_measure <- function(n, p, q, n_test, eff, max = 1000){
+mc.cores <- 1
+
+performance_measure <- function(n, p, q, n_test, eff){
     data <- simulate_data_nonlinear(q, p, n+n_test, 4, eff)
     data_train <- data.frame(data$X[1:n,], Y = data$Y[1:n])
     data_test <- data.frame(data$X[(n+1):(n+n_test),], Y = data$Y[(n+1):(n+n_test)])
 
-    fit <- SDForest(Y ~ ., data_train, cp = 0, multicore = T, max_size = max)
+    fit <- SDForest(Y ~ ., data_train, cp = 0, mc.cores = mc.cores)
     fit2 <- ranger(Y ~ ., data_train, num.trees = 100, importance = 'impurity', mtry = floor(0.9 * ncol(data_train)))
 
     pred <- predict(fit, data_test)

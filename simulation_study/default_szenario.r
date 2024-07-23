@@ -1,5 +1,6 @@
-source("R/SDForest.r")
-multicore <- T
+#source("R/SDForest.r")
+library(SDForest)
+mc.cores <- 100
 
 p <- 500
 n <- 500
@@ -19,22 +20,22 @@ data$Y <- matrix(data$Y[1:n])
 data$f_X <- data$f_X[1:n]
 
 start <- Sys.time()
-fit <- SDForest(x = data$X, y = data$Y, cp = 0, multicore = multicore)
+fit <- SDForest(x = data$X, y = data$Y, cp = 0, mc.cores = mc.cores)
 end <- Sys.time()
 print(end - start)
 
 print('fit done')
 
-reg_path <- regPath(fit, oob = T, multicore = multicore)
+reg_path <- regPath(fit)
 print('reg_path done')
 
-stable_path <- stabilitySelection(fit, multicore = multicore)
+stable_path <- stabilitySelection(fit)
 print('stable_path done')
 
-dep_1 <- condDependence(fit, data$j[1], multicore = multicore)
-dep_2 <- condDependence(fit, data$j[2], multicore = multicore)
-dep_3 <- condDependence(fit, data$j[3], multicore = multicore)
-dep_4 <- condDependence(fit, data$j[4], multicore = multicore)
+dep_1 <- partDependence(fit, data$j[1], mc.cores = mc.cores)
+dep_2 <- partDependence(fit, data$j[2], mc.cores = mc.cores)
+dep_3 <- partDependence(fit, data$j[3], mc.cores = mc.cores)
+dep_4 <- partDependence(fit, data$j[4], mc.cores = mc.cores)
 print('dep done')
 
 save(data, data_test, fit, reg_path, stable_path, dep_1, dep_2, dep_3, dep_4, 

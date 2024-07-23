@@ -43,12 +43,14 @@ predict.ranger_fun <- function(object, newdata){
     return(predict(object$model, newdata)$predictions)
 }
 
-source('R/SDForest.r')
+#source('R/SDForest.r')
+library(SDForest)
 library(gridExtra)
 library(ggplot2)
 library(ranger)
 library(ggsci)
 library(ggpubr)
+library(tidyr)
 
 ##### default experiment #####
 
@@ -60,10 +62,10 @@ fit2 <- ranger(x = data.frame(data$X), y = data$Y, num.trees = 100,
 
 true_f <- true_function(data$beta, data$j)
 
-dep_f_1 <- condDependence(true_f, data$j[1], data$X)
-dep_f_2 <- condDependence(true_f, data$j[2], data$X)
-dep_f_3 <- condDependence(true_f, data$j[3], data$X)
-dep_f_4 <- condDependence(true_f, data$j[4], data$X)
+dep_f_1 <- partDependence(true_f, data$j[1], data$X)
+dep_f_2 <- partDependence(true_f, data$j[2], data$X)
+dep_f_3 <- partDependence(true_f, data$j[3], data$X)
+dep_f_4 <- partDependence(true_f, data$j[4], data$X)
 
 imp_1 <- fit$var_importance / max(fit$var_importance)
 imp_2 <- fit2$variable.importance / max(fit2$variable.importance)
@@ -81,7 +83,6 @@ ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariate
   ylab('Variable importance ranger') + scale_color_tron() + ggtitle('Logarithmic scale')
 
 gg_imp <- ggarrange(ggimp, ggimp_log, ncol = 2, nrow = 1, common.legend = T, legend = 'bottom')
-gg_imp
 
 ggsave(filename = "simulation_study/figures/imp.jpeg", plot = gg_imp, width = 6, height = 4)
 
@@ -112,10 +113,10 @@ ggsave(filename = "simulation_study/figures/cond_rf.jpeg", plot = gg_cond_rf, wi
 
 ranger_fit <- ranger_fun(fit2)
 
-dep_r_1 <- condDependence(ranger_fit, data$j[1], data.frame(data$X))
-dep_r_2 <- condDependence(ranger_fit, data$j[2], data.frame(data$X))
-dep_r_3 <- condDependence(ranger_fit, data$j[3], data.frame(data$X))
-dep_r_4 <- condDependence(ranger_fit, data$j[4], data.frame(data$X))
+dep_r_1 <- partDependence(ranger_fit, data$j[1], data.frame(data$X))
+dep_r_2 <- partDependence(ranger_fit, data$j[2], data.frame(data$X))
+dep_r_3 <- partDependence(ranger_fit, data$j[3], data.frame(data$X))
+dep_r_4 <- partDependence(ranger_fit, data$j[4], data.frame(data$X))
 
 ggdep1_r <- plotDep(dep_r_1) + 
   geom_line(aes(x = dep_f_1$x_seq, y = dep_f_1$preds_mean, col = 'red'), linewidth = 0.2) + 
@@ -152,9 +153,6 @@ gg_regpath <- gg_regpath + theme_bw() + xlab('Regularization: cp') +
   ylab('Variable importance') + ggtitle('Variable importance path') +
   xlim(0, 0.5)
 
-gg_regpath
-
-
 gg_stablepath <- ggplot()
 for(i in 1:ncol(stable_path$varImp_path)){
   gg_stablepath <- gg_stablepath + geom_line(data = data.frame(x = stable_path$cp, 
@@ -165,10 +163,7 @@ gg_stablepath <- gg_stablepath + theme_bw() + xlab('Regularization') +
   ylab(expression(Pi)) + ggtitle('Stability selection path') +
   xlim(0, 0.5)
 
-gg_stablepath
-
 gg_paths <- grid.arrange(gg_regpath, gg_stablepath, ncol = 2)
-gg_paths
 
 ggsave(filename = "simulation_study/figures/paths.jpeg", plot = gg_paths, width = 6, height = 4)
 
@@ -176,7 +171,6 @@ ggsave(filename = "simulation_study/figures/paths.jpeg", plot = gg_paths, width 
 agg_fun <- function(x){
   mean(x**2)
 }
-
 
 load_perf <- function(path, agg_fun){
   load(path)
@@ -190,8 +184,6 @@ load_perf <- function(path, agg_fun){
   perf
 }
 
-library(ggplot2)
-library(tidyr)
 
 files <- list.files('simulation_study/results/perf_n')
 length(files)
@@ -204,7 +196,6 @@ gg_n <- ggplot(perf_n, aes(x = seq, y = error, fill = method)) +
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of training samples') + 
   ylab('Mean squared error') + scale_fill_tron()
 
-gg_n
 ggsave(filename = "simulation_study/figures/n.jpeg", plot = gg_n, width = 6, height = 4)
 
 files <- list.files('simulation_study/results/perf_p')
@@ -221,7 +212,6 @@ gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) +
 
 gg_p
 ggsave(filename = "simulation_study/figures/p.jpeg", plot = gg_p, width = 6, height = 4)
-
 
 
 files <- list.files('simulation_study/results/perf_q')
@@ -263,14 +253,11 @@ res_reg_u <- data.frame(apply(simplify2array(res_reg), 1:2, quantile, prob = 0.9
 res_reg_l <- data.frame(apply(simplify2array(res_reg), 1:2, quantile, prob = 0.05))
 
 res_reg_mean <- gather(res_reg_mean, key = 'type', value = 'mean', -cp)
-
 res_reg_u <- gather(res_reg_u, key = 'type', value = 'u', -cp)
-
 res_reg_l <- gather(res_reg_l, key = 'type', value = 'l', -cp)
 
 res <- merge(res_reg_mean, res_reg_u)
 res <- merge(res, res_reg_l)
-
 
 gg_reg <- ggplot(res, aes(x = cp, y = mean)) + 
   geom_line(aes(col = type, linetype = type)) + 

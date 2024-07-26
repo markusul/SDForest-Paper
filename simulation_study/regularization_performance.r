@@ -1,7 +1,8 @@
 library(SDForest)
 library(parallel)
 
-mc.cores <- 100
+set.seed(2024)
+mc.cores <- 1
 
 p <- 500
 n <- 500

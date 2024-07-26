@@ -58,7 +58,7 @@ load('simulation_study/results/default_szenario.RData')
 set.seed(2024)
 
 fit2 <- ranger(x = data.frame(data$X), y = data$Y, num.trees = 100, 
-  importance = 'impurity', mtry = floor(0.9 * ncol(data$X)))
+  importance = 'impurity', mtry = floor(0.5 * ncol(data$X)))
 
 true_f <- true_function(data$beta, data$j)
 
@@ -174,7 +174,7 @@ agg_fun <- function(x){
 
 load_perf <- function(path, agg_fun){
   load(path)
-  perf <- lapply(perf, function(n) cbind(t(sapply(n, function(x)sapply(x, agg_fun))), seq = seq))
+  perf <- lapply(perf, function(n) cbind(t(sapply(n, function(x)sapply(x, agg_fun))), seq = seq_))
 
   perf <- do.call(rbind, perf)
   perf <- data.frame(perf)

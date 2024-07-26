@@ -1,6 +1,6 @@
 #source("R/SDForest.r")
 library(SDForest)
-mc.cores <- 100
+mc.cores <- 1
 
 p <- 500
 n <- 500

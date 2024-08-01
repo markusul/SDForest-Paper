@@ -1,3 +1,49 @@
+require(grid)
+grid_arrange_shared_legend <-
+  function(...,
+           ncol = length(list(...)),
+           nrow = 1,
+           position = c("bottom", "right"), 
+           left = NULL) {
+    
+    plots <- list(...)
+    position <- match.arg(position)
+    g <-
+      ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
+    legend <- g[[which(sapply(g, function(x)
+      x$name) == "guide-box")]]
+    lheight <- sum(legend$height)
+    lwidth <- sum(legend$width)
+    gl <- lapply(plots, function(x)
+      x + theme(legend.position = "none"))
+    gl <- c(gl, ncol = ncol, nrow = nrow)
+    
+    combined <- switch(
+      position,
+      "bottom" = arrangeGrob(
+        do.call(arrangeGrob, gl),
+        legend,
+        ncol = 1,
+        heights = unit.c(unit(1, "npc") - lheight, lheight),
+        left = grid.text(left, rot = 90)
+      ),
+      "right" = arrangeGrob(
+        do.call(arrangeGrob, gl),
+        legend,
+        ncol = 2,
+        widths = unit.c(unit(1, "npc") - lwidth, lwidth),
+        left = grid.text(left, rot = 90)
+      )
+    )
+    
+    grid.newpage()
+    grid.draw(combined)
+    
+    # return gtable invisibly
+    invisible(combined)
+    
+  }
+
 true_function <- function(beta, js){
     res <- list(beta = beta, js = js)
     class(res) <- 'true_function'
@@ -31,7 +77,7 @@ plotDep <- function(object, n_examples = 19){
   }else{
     ggdep <- ggdep + ggplot2::xlab(paste('x', object$j, sep = ''))
   }
-  ggdep + ggplot2::ylim(-5, 6)
+  ggdep + ggplot2::ylim(-2.2, 2)
 }
 
 ranger_fun <- function(object){
@@ -55,6 +101,8 @@ library(tidyr)
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')
+plotOOB(reg_path)
+
 set.seed(2024)
 
 fit2 <- ranger(x = data.frame(data$X), y = data$Y, num.trees = 100, 
@@ -159,7 +207,7 @@ for(i in 1:ncol(stable_path$varImp_path)){
     y = stable_path$varImp_path[, i]), aes(x = x, y = y), 
     col = if(i %in% data$j)'#d11010' else 'grey')
 }
-gg_stablepath <- gg_stablepath + theme_bw() + xlab('Regularization') + 
+gg_stablepath <- gg_stablepath + theme_bw() + xlab('Regularization: cp') + 
   ylab(expression(Pi)) + ggtitle('Stability selection path') +
   xlim(0, 0.5)
 
@@ -168,6 +216,8 @@ gg_paths <- grid.arrange(gg_regpath, gg_stablepath, ncol = 2)
 ggsave(filename = "simulation_study/figures/paths.jpeg", plot = gg_paths, width = 6, height = 4)
 
 ##### Performance depending on the dimensions #####
+error_name <- expression("||"*f^0*(x[test]) - widehat(f(x[test]))*"||"[2]^2 / n[test])
+
 agg_fun <- function(x){
   mean(x**2)
 }
@@ -193,10 +243,10 @@ perf_n <- lapply(paste0('simulation_study/results/perf_n/', files),
 perf_n <- do.call(rbind, perf_n)
 
 gg_n <- ggplot(perf_n, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of training samples') + 
-  ylab('Mean squared error') + scale_fill_tron()
-
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('a) Number of training samples') + 
+  ylab('') + scale_fill_tron()
 ggsave(filename = "simulation_study/figures/n.jpeg", plot = gg_n, width = 6, height = 4)
+gg_n <- gg_n + theme(legend.position = c(0.061, 0.9))
 
 files <- list.files('simulation_study/results/perf_p')
 length(files)
@@ -207,12 +257,10 @@ perf_p <- lapply(paste0('simulation_study/results/perf_p/', files),
 perf_p <- do.call(rbind, perf_p)
 
 gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of covariates') + 
-  ylab('Mean squared error') + scale_fill_tron()
-
-gg_p
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('b) Number of covariates') + 
+  ylab('') + scale_fill_tron() 
 ggsave(filename = "simulation_study/figures/p.jpeg", plot = gg_p, width = 6, height = 4)
-
+gg_p <- gg_p + theme(legend.position = 'None')
 
 files <- list.files('simulation_study/results/perf_q')
 length(files)
@@ -223,11 +271,10 @@ perf_q <- lapply(paste0('simulation_study/results/perf_q/', files),
 perf_q <- do.call(rbind, perf_q)
 
 gg_q <- ggplot(perf_q, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of confounders') + 
-  ylab('Mean error') + scale_fill_tron()
-gg_q
-
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('c) Number of confounders') + 
+  ylab('') + scale_fill_tron()
 ggsave(filename = "simulation_study/figures/q.jpeg", plot = gg_q, width = 6, height = 4)
+gg_q <- gg_q + theme(legend.position = 'None')
 
 #files <- list.files('simulation_study/results/perf_max')
 #length(files)
@@ -280,8 +327,34 @@ perf_eff <- lapply(paste0('simulation_study/results/perf_eff/', files),
 perf_eff <- do.call(rbind, perf_eff)
 
 gg_eff <- ggplot(perf_eff, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
-  ylab('Mean squared error') + scale_fill_tron()
-
-gg_eff
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("d) Number of affected covariates") + 
+  ylab('') + scale_fill_tron()
 ggsave(filename = "simulation_study/figures/eff.jpeg", plot = gg_eff, width = 6, height = 4)
+gg_eff <- gg_eff + theme(legend.position = 'None')
+gg_eff
+
+gg_dims <- grid_arrange_shared_legend(gg_n, gg_p, gg_q, gg_eff, 
+                           ncol = 2, nrow = 2, 
+                           left = error_name)
+gg_dims
+
+ggsave(filename = "simulation_study/figures/dims1.jpeg", 
+       plot = gg_dims, width = 8, height = 6)
+
+perf_n$dim <- 'a) Number of training samples'
+perf_p$dim <- 'b) Number of covariates'
+perf_q$dim <- 'c) Number of confounders'
+perf_eff$dim <- "d) Number of affected covariates"
+
+perf_dim <- rbind(perf_n, perf_p, perf_q, perf_eff)
+perf_dim$seq <- factor(perf_dim$seq, order = TRUE, 
+                       levels = as.character(sort(as.numeric(levels(perf_dim$seq)))))
+
+gg_dims2 <- ggplot(perf_dim, aes(x = seq, y = error, fill = method)) + 
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("") + 
+  ylab(error_name) + scale_fill_tron() + facet_wrap(~dim, ncol = 2, scales="free") + 
+  theme(legend.position = 'bottom')
+gg_dims2
+
+ggsave(filename = "simulation_study/figures/dims2.jpeg", 
+       plot = gg_dims2, width = 8, height = 6)

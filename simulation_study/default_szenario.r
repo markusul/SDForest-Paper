@@ -3,7 +3,7 @@ library(SDForest)
 mc.cores <- 1
 
 p <- 500
-n <- 500
+n <- 1000
 q <- 20
 
 n_test <- 500

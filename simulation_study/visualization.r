@@ -229,20 +229,20 @@ gg_q
 
 ggsave(filename = "simulation_study/figures/q.jpeg", plot = gg_q, width = 6, height = 4)
 
-files <- list.files('simulation_study/results/perf_max')
-length(files)
+#files <- list.files('simulation_study/results/perf_max')
+#length(files)
 
-perf_max <- lapply(paste0('simulation_study/results/perf_max/', files), 
-  load_perf, agg_fun = agg_fun)
+#perf_max <- lapply(paste0('simulation_study/results/perf_max/', files), 
+#  load_perf, agg_fun = agg_fun)
 
-perf_max <- do.call(rbind, perf_max)
+#perf_max <- do.call(rbind, perf_max)
 
-gg_max <- ggplot(perf_max, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Subsample size') + 
-  ylab('Mean error') + scale_fill_tron()
-gg_max
+#gg_max <- ggplot(perf_max, aes(x = seq, y = error, fill = method)) + 
+#  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Subsample size') + 
+#  ylab('Mean error') + scale_fill_tron()
+#gg_max
 
-ggsave(filename = "simulation_study/figures/max.jpeg", plot = gg_max, width = 6, height = 4)
+#ggsave(filename = "simulation_study/figures/max.jpeg", plot = gg_max, width = 6, height = 4)
 
 ##### Regularization performance #####
 

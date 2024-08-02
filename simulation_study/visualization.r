@@ -209,7 +209,7 @@ gg_regpath <- gg_regpath + theme_bw() + xlab('') +
   ylab('Variable importance') + ggtitle('Variable importance path') +
   xlim(0, 0.4) + geom_point(aes(x = 1, y = 0, col = "red")) +
   ggplot2::labs(col = "") + 
-  ggplot2::scale_color_manual(values = c("red"), labels = c("True Function     "))
+  ggplot2::scale_color_manual(values = c("red"), labels = c("causal parents     "))
 
 gg_stablepath <- ggplot()
 for(i in 1:ncol(stable_path$varImp_path)){
@@ -221,7 +221,7 @@ gg_stablepath <- gg_stablepath + theme_bw() + xlab('') +
   ylab(expression(Pi)) + ggtitle('Stability selection path') +
   xlim(0, 0.4) + geom_point(aes(x = 1, y = 0, col = "red")) +
   ggplot2::labs(col = "") + 
-  ggplot2::scale_color_manual(values = c("red"), labels = c("True Function    "))
+  ggplot2::scale_color_manual(values = c("red"), labels = c("causal parents    "))
 
 gg_paths <- grid_arrange_shared_legend(gg_regpath, gg_stablepath, ncol = 2, 
                                        bottom = 'Regularization: cp', 

@@ -207,7 +207,7 @@ for(i in 1:ncol(reg_path$varImp_path)){
 }
 gg_regpath <- gg_regpath + theme_bw() + xlab('') + 
   ylab('Variable importance') + ggtitle('Variable importance path') +
-  xlim(0, 0.5) + geom_point(aes(x = 1, y = 0, col = "red")) +
+  xlim(0, 0.4) + geom_point(aes(x = 1, y = 0, col = "red")) +
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function     "))
 
@@ -219,7 +219,7 @@ for(i in 1:ncol(stable_path$varImp_path)){
 }
 gg_stablepath <- gg_stablepath + theme_bw() + xlab('') + 
   ylab(expression(Pi)) + ggtitle('Stability selection path') +
-  xlim(0, 0.5) + geom_point(aes(x = 1, y = 0, col = "red")) +
+  xlim(0, 0.4) + geom_point(aes(x = 1, y = 0, col = "red")) +
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function    "))
 
@@ -263,7 +263,7 @@ gg_n <- ggplot(perf_n, aes(x = seq, y = error, fill = method)) +
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of training samples') + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
   
-ggsave(filename = "simulation_study/figures/n.jpeg", plot = gg_n, width = 6, height = 4)
+#ggsave(filename = "simulation_study/figures/n.jpeg", plot = gg_n, width = 6, height = 4)
 gg_n <- gg_n + annotate(geom = "text", label = 'a)', 
                 x = ggplot_build(gg_n)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
                 y = ggplot_build(gg_n)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
@@ -280,7 +280,7 @@ perf_p <- do.call(rbind, perf_p)
 gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of covariates') + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-ggsave(filename = "simulation_study/figures/p.jpeg", plot = gg_p, width = 6, height = 4)
+#ggsave(filename = "simulation_study/figures/p.jpeg", plot = gg_p, width = 6, height = 4)
 gg_p <- gg_p + annotate(geom = "text", label = 'b)', 
                         x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
                         y = ggplot_build(gg_p)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
@@ -297,26 +297,11 @@ perf_q <- do.call(rbind, perf_q)
 gg_q <- ggplot(perf_q, aes(x = seq, y = error, fill = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of confounders') + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-ggsave(filename = "simulation_study/figures/q.jpeg", plot = gg_q, width = 6, height = 4)
+#ggsave(filename = "simulation_study/figures/q.jpeg", plot = gg_q, width = 6, height = 4)
 gg_q <- gg_q + annotate(geom = "text", label = 'c)', 
                         x = ggplot_build(gg_q)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.05 + annot_x_shift, 
                         y = ggplot_build(gg_q)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_q
-
-#files <- list.files('simulation_study/results/perf_max')
-#length(files)
-
-#perf_max <- lapply(paste0('simulation_study/results/perf_max/', files), 
-#  load_perf, agg_fun = agg_fun)
-
-#perf_max <- do.call(rbind, perf_max)
-
-#gg_max <- ggplot(perf_max, aes(x = seq, y = error, fill = method)) + 
-#  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Subsample size') + 
-#  ylab('Mean error') + scale_fill_tron()
-#gg_max
-
-#ggsave(filename = "simulation_study/figures/max.jpeg", plot = gg_max, width = 6, height = 4)
 
 ##### Regularization performance #####
 
@@ -356,7 +341,7 @@ perf_eff <- do.call(rbind, perf_eff)
 gg_eff <- ggplot(perf_eff, aes(x = seq, y = error, fill = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-ggsave(filename = "simulation_study/figures/eff.jpeg", plot = gg_eff, width = 6, height = 4)
+#ggsave(filename = "simulation_study/figures/eff.jpeg", plot = gg_eff, width = 6, height = 4)
 gg_eff <- gg_eff + annotate(geom = "text", label = 'd)', 
                         x = ggplot_build(gg_eff)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
                         y = ggplot_build(gg_eff)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)

@@ -15,7 +15,7 @@ N_rep <- 100
 
 print('start')
 res_reg <- mclapply(1:N_rep, function(i){
-    data <- simulate_data_nonlinear(q, p, n + n_test, 4)
+    data <- simulate_data_nonlinear(q = q, p = p, n = n + n_test, m = 4)
     data_test <- data
     data_test$Y <- data_test$Y[(n+1):(n+n_test)]
     data_test$X <- data_test$X[(n+1):(n+n_test),]

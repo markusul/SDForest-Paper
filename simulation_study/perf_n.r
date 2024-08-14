@@ -13,7 +13,7 @@ seq_ <- seq(100, 1000, 200)
 
 print('start')
 start <- Sys.time()
-perf <- lapply(1:N_rep, function(i) lapply(seq_, function(n) performance_measure(n, p, q, n_test, eff = NULL)))
+perf <- lapply(1:N_rep, function(i) lapply(seq_, function(n) performance_measure(n = n, p = p, q = q, n_test = n_test, eff = NULL)))
 save(perf, seq_, file = paste("simulation_study/results/perf_n/", args[1], '.RData', sep=''))
 print('n done')
 print(Sys.time() - start)

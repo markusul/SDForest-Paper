@@ -265,7 +265,7 @@ load_perf <- function(path, agg_fun){
   perf
 }
 
-
+#### n
 files <- list.files('simulation_study/results/perf_n')
 length(files)
 perf_n <- lapply(paste0('simulation_study/results/perf_n/', files), 
@@ -277,12 +277,12 @@ gg_n <- ggplot(perf_n, aes(x = seq, y = error, fill = method)) +
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of training samples') + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
   
-#ggsave(filename = "simulation_study/figures/n.jpeg", plot = gg_n, width = 6, height = 4)
 gg_n <- gg_n + annotate(geom = "text", label = 'a)', 
                 x = ggplot_build(gg_n)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
                 y = ggplot_build(gg_n)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_n
 
+#### p
 files <- list.files('simulation_study/results/perf_p')
 length(files)
 
@@ -294,12 +294,13 @@ perf_p <- do.call(rbind, perf_p)
 gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of covariates') + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-#ggsave(filename = "simulation_study/figures/p.jpeg", plot = gg_p, width = 6, height = 4)
+
 gg_p <- gg_p + annotate(geom = "text", label = 'b)', 
                         x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
                         y = ggplot_build(gg_p)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_p
 
+#### q
 files <- list.files('simulation_study/results/perf_q')
 length(files)
 
@@ -311,40 +312,13 @@ perf_q <- do.call(rbind, perf_q)
 gg_q <- ggplot(perf_q, aes(x = seq, y = error, fill = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of confounders') + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-#ggsave(filename = "simulation_study/figures/q.jpeg", plot = gg_q, width = 6, height = 4)
+
 gg_q <- gg_q + annotate(geom = "text", label = 'c)', 
                         x = ggplot_build(gg_q)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.05 + annot_x_shift, 
                         y = ggplot_build(gg_q)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_q
 
-##### Regularization performance #####
-
-load('simulation_study/results/regularization_performance.RData')
-
-res_reg_mean <- data.frame(apply(simplify2array(res_reg), 1:2, mean))
-res_reg_u <- data.frame(apply(simplify2array(res_reg), 1:2, quantile, prob = 0.95))
-res_reg_l <- data.frame(apply(simplify2array(res_reg), 1:2, quantile, prob = 0.05))
-
-res_reg_mean <- gather(res_reg_mean, key = 'type', value = 'mean', -cp)
-res_reg_u <- gather(res_reg_u, key = 'type', value = 'u', -cp)
-res_reg_l <- gather(res_reg_l, key = 'type', value = 'l', -cp)
-
-res <- merge(res_reg_mean, res_reg_u)
-res <- merge(res, res_reg_l)
-
-gg_reg <- ggplot(res, aes(x = cp, y = mean)) + 
-  geom_line(aes(col = type, linetype = type)) + 
-  geom_ribbon(aes(ymin = l, ymax = u, fill = type), alpha = 0.2) + 
-  theme_bw() + xlab('Regularization: cp') + ylab('Error') +
-  guides(fill = guide_legend(title = NULL), linetype = guide_legend(title = NULL), 
-    col = guide_legend(title = NULL))
-
-gg_reg
-ggsave(filename = "simulation_study/figures/reg.jpeg", plot = gg_reg, width = 6, height = 4)
-
-
-#### Density performance ####
-
+#### Density assumption ####
 files <- list.files('simulation_study/results/perf_eff')
 length(files)
 perf_eff <- lapply(paste0('simulation_study/results/perf_eff/', files), 
@@ -355,7 +329,7 @@ perf_eff <- do.call(rbind, perf_eff)
 gg_eff <- ggplot(perf_eff, aes(x = seq, y = error, fill = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-#ggsave(filename = "simulation_study/figures/eff.jpeg", plot = gg_eff, width = 6, height = 4)
+
 gg_eff <- gg_eff + annotate(geom = "text", label = 'd)', 
                         x = ggplot_build(gg_eff)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
                         y = ggplot_build(gg_eff)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
@@ -399,7 +373,6 @@ gg_dims2 <- gg_dims2 + geom_text(
                 label = label, 
                 vjust = 1.5, hjust = -0.6), 
 )
-
 gg_dims2
 
 ggsave(filename = "simulation_study/figures/dims2.jpeg", 
@@ -423,3 +396,55 @@ gg_lim1 <- gg_lim1 + annotate(geom = "text", label = 'd)',
                             x = ggplot_build(gg_eff)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
                             y = ggplot_build(gg_eff)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_lim1
+
+#### limitations confounding fixed on causal parents
+files <- list.files('simulation_study/results/perf_limitations_1')
+length(files)
+perf_lim1 <- lapply(paste0('simulation_study/results/perf_limitations_1/', files), 
+                   load_perf, agg_fun = agg_fun)
+perf_lim1 <- do.call(rbind, perf_lim1)
+
+gg_lim1 <- ggplot(perf_lim1, aes(x = seq, y = error, fill = method)) + 
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
+  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
+gg_lim1
+
+ggsave(filename = "simulation_study/figures/lim1.jpeg", plot = gg_lim1, width = 6, height = 4)
+
+
+files <- list.files('simulation_study/results/perf_limitations_2')
+length(files)
+perf_lim2 <- lapply(paste0('simulation_study/results/perf_limitations_2/', files), 
+                    load_perf, agg_fun = agg_fun)
+perf_lim2 <- do.call(rbind, perf_lim2)
+
+gg_lim2 <- ggplot(perf_lim2, aes(x = seq, y = error, fill = method)) + 
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
+  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
+gg_lim2
+
+
+##### Regularization performance #####
+
+load('simulation_study/results/regularization_performance.RData')
+
+res_reg_mean <- data.frame(apply(simplify2array(res_reg), 1:2, mean))
+res_reg_u <- data.frame(apply(simplify2array(res_reg), 1:2, quantile, prob = 0.95))
+res_reg_l <- data.frame(apply(simplify2array(res_reg), 1:2, quantile, prob = 0.05))
+
+res_reg_mean <- gather(res_reg_mean, key = 'type', value = 'mean', -cp)
+res_reg_u <- gather(res_reg_u, key = 'type', value = 'u', -cp)
+res_reg_l <- gather(res_reg_l, key = 'type', value = 'l', -cp)
+
+res <- merge(res_reg_mean, res_reg_u)
+res <- merge(res, res_reg_l)
+
+gg_reg <- ggplot(res, aes(x = cp, y = mean)) + 
+  geom_line(aes(col = type, linetype = type)) + 
+  geom_ribbon(aes(ymin = l, ymax = u, fill = type), alpha = 0.2) + 
+  theme_bw() + xlab('Regularization: cp') + ylab('Error') +
+  guides(fill = guide_legend(title = NULL), linetype = guide_legend(title = NULL), 
+         col = guide_legend(title = NULL))
+
+gg_reg
+ggsave(filename = "simulation_study/figures/reg.jpeg", plot = gg_reg, width = 6, height = 4)

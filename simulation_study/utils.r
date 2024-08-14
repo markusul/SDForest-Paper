@@ -4,8 +4,8 @@ library(parallel)
 
 mc.cores <- 1
 
-performance_measure <- function(n, p, q, n_test, eff){
-    data <- simulate_data_nonlinear(q, p, n+n_test, 4, eff)
+performance_measure <- function(n, p, q, n_test, eff, fixEff = FALSE){
+    data <- simulate_data_nonlinear(q = q, p = p, n = n+n_test, m = 4, eff = eff, fixEff = fixEff)
     data_train <- data.frame(data$X[1:n,], Y = data$Y[1:n])
     data_test <- data.frame(data$X[(n+1):(n+n_test),], Y = data$Y[(n+1):(n+n_test)])
 

@@ -379,24 +379,6 @@ ggsave(filename = "simulation_study/figures/dims2.jpeg",
        plot = gg_dims2, width = 8, height = 6)
 
 
-
-
-files <- list.files('simulation_study/results/perf_limitations_1')
-length(files)
-perf_lim1 <- lapply(paste0('simulation_study/results/perf_limitations_1/', files), 
-                   load_perf, agg_fun = agg_fun)
-
-perf_lim1 <- do.call(rbind, perf_lim1)
-
-gg_lim1 <- ggplot(perf_lim1, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-#ggsave(filename = "simulation_study/figures/eff.jpeg", plot = gg_eff, width = 6, height = 4)
-gg_lim1 <- gg_lim1 + annotate(geom = "text", label = 'd)', 
-                            x = ggplot_build(gg_eff)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
-                            y = ggplot_build(gg_eff)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
-gg_lim1
-
 #### limitations confounding fixed on causal parents
 files <- list.files('simulation_study/results/perf_limitations_1')
 length(files)

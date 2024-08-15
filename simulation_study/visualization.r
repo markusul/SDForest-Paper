@@ -124,7 +124,21 @@ imp_2 <- fit2$variable.importance / max(fit2$variable.importance)
 true_imp <- rep('spurious     ', length(imp_1))
 true_imp[data$j] <- 'causal'
 
+#order of causal parents in the model
+fileConn<-file("simulation_study/figures/causal_order.txt")
+
+# SDF
+sdf_order <- paste(c('SDF:', which(true_imp[order(imp_1, decreasing = T)] == 'causal')), 
+                   collapse = ' ')
+#ranger
+ranger_order <- paste(c('ranger:', which(true_imp[order(imp_2, decreasing = T)] == 'causal')), 
+                   collapse = ' ')
+writeLines(c(sdf_order, ranger_order), fileConn)
+close(fileConn)
+
 imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_imp))
+
+
 
 ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, col = Covariates)) + 
   geom_point(size = 0.5) + theme_bw() + xlab('') + 
@@ -363,6 +377,7 @@ gg_dims2
 
 ggsave(filename = "simulation_study/figures/dims2.jpeg", 
        plot = gg_dims2, width = 8, height = 6)
+
 
 #### limitations confounding fixed on causal parents
 files <- list.files('simulation_study/results/perf_limitations_1')

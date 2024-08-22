@@ -318,7 +318,7 @@ gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) +
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
 
 gg_p <- gg_p + annotate(geom = "text", label = 'b)', 
-                        x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
+                        x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
                         y = ggplot_build(gg_p)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_p
 
@@ -414,18 +414,6 @@ gg_lim1 <- ggplot(perf_lim1, aes(x = seq, y = error, fill = method)) +
 gg_lim1
 
 ggsave(filename = "simulation_study/figures/lim1.jpeg", plot = gg_lim1, width = 6, height = 4)
-
-
-files <- list.files('simulation_study/results/perf_limitations_2')
-length(files)
-perf_lim2 <- lapply(paste0('simulation_study/results/perf_limitations_2/', files), 
-                    load_perf, agg_fun = agg_fun)
-perf_lim2 <- do.call(rbind, perf_lim2)
-
-gg_lim2 <- ggplot(perf_lim2, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-gg_lim2
 
 
 ##### Regularization performance #####

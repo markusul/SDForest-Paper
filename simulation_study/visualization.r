@@ -102,6 +102,28 @@ library(ggsci)
 library(ggpubr)
 library(tidyr)
 
+##### motivation of loss #####
+
+set.seed(22)
+dat <- simulate_data_nonlinear(50, 500, 500, 4) 
+Y <- dat$Y
+f <- dat$f_X
+Q <- get_Q(dat$X, 'trim')
+QY <- Q %*% Y
+Qf <- Q %*% f
+
+df <- data.frame(f, Y, QY, Qf)
+
+plain <- ggplot(df, aes(y = f, x = Y)) + 
+  geom_point(size = 0.4) + theme_bw() + 
+  ylab("f(X)")
+
+transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
+  geom_point(size = 0.4) + theme_bw() + 
+  ylab("Qf(X)")
+
+pt <- grid.arrange(plain, transformed)
+ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 5, height = 10)
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')
@@ -211,7 +233,7 @@ ggdep4_r <- plotDep(dep_r_4) +
 gg_cond_r <- grid_arrange_shared_legend(ggdep1_r, ggdep2_r, ggdep3_r, ggdep4_r,
                                          ncol = 2, nrow = 2, left = 'f(X)')
 ggsave(filename = "simulation_study/figures/cond_r.jpeg", 
-       plot = gg_cond_r, width = 8, height = 6)
+       plot = gg_cond_r, width = 10, height = 8)
 
 gg_regpath <- ggplot()
 for(i in 1:ncol(reg_path$varImp_path)){

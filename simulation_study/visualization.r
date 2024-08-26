@@ -105,7 +105,7 @@ library(tidyr)
 ##### motivation of loss #####
 
 set.seed(22)
-dat <- simulate_data_nonlinear(50, 500, 500, 4) 
+dat <- simulate_data_nonlinear(q = 20, p = 500, n = 1000, m = 4) 
 Y <- dat$Y
 f <- dat$f_X
 Q <- get_Q(dat$X, 'trim')

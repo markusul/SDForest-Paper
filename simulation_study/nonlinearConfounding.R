@@ -56,9 +56,9 @@ simulate_nonlinear_confounding <- function(q, p, n, m, df){
 
 # Example simulations
 set.seed(42)
-p <- 30
+p <- 300
 q <- 1
-n <- 50
+n <- 500
 df <- 4
 m <- 1
 
@@ -101,7 +101,7 @@ performance_measure <- function(n, p, q, n_test){
   return(list(SDF = mse, RF= mse2))
 }
 
-perf <- replicate(10, sapply(performance_measure(n, p, q, 500), 
+perf <- replicate(100, sapply(performance_measure(n, p, q, 500), 
                               function(x)mean(x**2)))
 perf <- t(perf)
 

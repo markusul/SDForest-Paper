@@ -443,8 +443,7 @@ ggsave(filename = "simulation_study/figures/reg.jpeg", plot = gg_reg, width = 6,
 
 
 ##### Nonlinear confounding #####
-
-load('simulation_study/results/nonlin_confounding.RData')
+library(EQL)
 
 f_hermite <- function(x, beta, js){
     # function to generate f_X
@@ -508,16 +507,17 @@ X <- sapply(1:max_df, function(df){
 
 X <- as.vector(X)
 H <- rep(H, max_df)
-df <- as.factor(rep(paste('df =', 1:max_df), each = n))
+dfs <- as.factor(rep(paste('df =', 1:max_df), each = n))
 
-herm_df <- data.frame(X, H, df)
+herm_df <- data.frame(X, H, dfs)
 gg_herm <- ggplot(herm_df, aes(x = H, y = X)) + 
   geom_line() + 
-  facet_grid(~df) + 
+  facet_grid(~dfs) + 
   theme_bw()
 gg_herm
 ggsave(filename = "simulation_study/figures_nl/herm.jpeg", plot = gg_herm, width = 10, height = 4)
 
+load('simulation_study/results/nonlin_confounding.RData')
 gg_sing <- ggplot(sing, aes(x = i, y = d)) + 
   geom_point(aes()) + ylab(expression(lambda[i])) + 
   theme_bw()

@@ -102,6 +102,28 @@ library(ggsci)
 library(ggpubr)
 library(tidyr)
 
+##### motivation of loss #####
+
+set.seed(22)
+dat <- simulate_data_nonlinear(q = 20, p = 500, n = 1000, m = 4) 
+Y <- dat$Y
+f <- dat$f_X
+Q <- get_Q(dat$X, 'trim')
+QY <- Q %*% Y
+Qf <- Q %*% f
+
+df <- data.frame(f, Y, QY, Qf)
+
+plain <- ggplot(df, aes(y = f, x = Y)) + 
+  geom_point(size = 0.2) + theme_bw() + 
+  ylab("f(X)")
+
+transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
+  geom_point(size = 0.2) + theme_bw() + 
+  ylab("Qf(X)")
+
+pt <- grid.arrange(plain, transformed)
+ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 3, height = 6)
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')
@@ -124,7 +146,21 @@ imp_2 <- fit2$variable.importance / max(fit2$variable.importance)
 true_imp <- rep('spurious     ', length(imp_1))
 true_imp[data$j] <- 'causal'
 
+#order of causal parents in the model
+fileConn<-file("simulation_study/figures/causal_order.txt")
+
+# SDF
+sdf_order <- paste(c('SDF:', which(true_imp[order(imp_1, decreasing = T)] == 'causal')), 
+                   collapse = ' ')
+#ranger
+ranger_order <- paste(c('ranger:', which(true_imp[order(imp_2, decreasing = T)] == 'causal')), 
+                   collapse = ' ')
+writeLines(c(sdf_order, ranger_order), fileConn)
+close(fileConn)
+
 imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_imp))
+
+
 
 ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, col = Covariates)) + 
   geom_point(size = 0.5) + theme_bw() + xlab('') + 
@@ -197,7 +233,7 @@ ggdep4_r <- plotDep(dep_r_4) +
 gg_cond_r <- grid_arrange_shared_legend(ggdep1_r, ggdep2_r, ggdep3_r, ggdep4_r,
                                          ncol = 2, nrow = 2, left = 'f(X)')
 ggsave(filename = "simulation_study/figures/cond_r.jpeg", 
-       plot = gg_cond_r, width = 8, height = 6)
+       plot = gg_cond_r, width = 10, height = 8)
 
 gg_regpath <- ggplot()
 for(i in 1:ncol(reg_path$varImp_path)){
@@ -282,7 +318,7 @@ gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) +
   ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
 
 gg_p <- gg_p + annotate(geom = "text", label = 'b)', 
-                        x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
+                        x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
                         y = ggplot_build(gg_p)$layout$panel_scales_y[[1]]$range$range[[2]] - annot_y_shift)
 gg_p
 
@@ -364,6 +400,7 @@ gg_dims2
 ggsave(filename = "simulation_study/figures/dims2.jpeg", 
        plot = gg_dims2, width = 8, height = 6)
 
+
 #### limitations confounding fixed on causal parents
 files <- list.files('simulation_study/results/perf_limitations_1')
 length(files)
@@ -377,18 +414,6 @@ gg_lim1 <- ggplot(perf_lim1, aes(x = seq, y = error, fill = method)) +
 gg_lim1
 
 ggsave(filename = "simulation_study/figures/lim1.jpeg", plot = gg_lim1, width = 6, height = 4)
-
-
-files <- list.files('simulation_study/results/perf_limitations_2')
-length(files)
-perf_lim2 <- lapply(paste0('simulation_study/results/perf_limitations_2/', files), 
-                    load_perf, agg_fun = agg_fun)
-perf_lim2 <- do.call(rbind, perf_lim2)
-
-gg_lim2 <- ggplot(perf_lim2, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-gg_lim2
 
 
 ##### Regularization performance #####

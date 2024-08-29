@@ -115,15 +115,15 @@ Qf <- Q %*% f
 df <- data.frame(f, Y, QY, Qf)
 
 plain <- ggplot(df, aes(y = f, x = Y)) + 
-  geom_point(size = 0.4) + theme_bw() + 
+  geom_point(size = 0.2) + theme_bw() + 
   ylab("f(X)")
 
 transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
-  geom_point(size = 0.4) + theme_bw() + 
+  geom_point(size = 0.2) + theme_bw() + 
   ylab("Qf(X)")
 
 pt <- grid.arrange(plain, transformed)
-ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 5, height = 10)
+ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 3, height = 6)
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')

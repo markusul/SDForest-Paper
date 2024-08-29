@@ -5,56 +5,7 @@ library(gridExtra)
 library(ggsci)
 library(tidyr)
 
-mc.cores <- 1
-
-require(grid)
-grid_arrange_shared_legend <-
-  function(...,
-           ncol = length(list(...)),
-           nrow = 1,
-           position = c("bottom", "right"), 
-           left = NULL, 
-           bottom = NULL,
-           vjust = 2.2) {
-    
-    plots <- list(...)
-    position <- match.arg(position)
-    g <-
-      ggplotGrob(plots[[1]] + theme(legend.position = position))$grobs
-    legend <- g[[which(sapply(g, function(x)
-      x$name) == "guide-box")]]
-    lheight <- sum(legend$height)
-    lwidth <- sum(legend$width)
-    gl <- lapply(plots, function(x)
-      x + theme(legend.position = "none"))
-    gl <- c(gl, ncol = ncol, nrow = nrow)
-    
-    combined <- switch(
-      position,
-      "bottom" = arrangeGrob(
-        do.call(arrangeGrob, gl),
-        legend,
-        ncol = 1,
-        heights = unit.c(unit(1, "npc") - lheight, lheight),
-        left = grid.text(left, rot = 90, vjust = vjust), 
-        bottom = grid.text(bottom)
-      ),
-      "right" = arrangeGrob(
-        do.call(arrangeGrob, gl),
-        legend,
-        ncol = 2,
-        widths = unit.c(unit(1, "npc") - lwidth, lwidth),
-        left = grid.text(left, rot = 90, vjust = vjust),
-        bottom = grid.text(bottom, vjust = -1.8)
-      )
-    )
-    
-    grid.newpage()
-    grid.draw(combined)
-    
-    # return gtable invisibly
-    invisible(combined)
-}
+mc.cores <- 100
 
 f_hermite <- function(x, beta, js){
     # function to generate f_X
@@ -103,31 +54,6 @@ simulate_nonlinear_confounding <- function(q, p, n, m, df){
   return(list(X = X, Y = Y, f_X = f_X, j = js))
 }
 
-# Visualization of hermite-polynomials
-p <- 1
-q <- 1
-n <- 1000
-max_df <- 4
-  
-set.seed(42)
-H <- matrix(rnorm(n*q), ncol=q)
-X <- sapply(1:max_df, function(df){
-  Betas <- replicate(p, matrix(runif(q*df, -1, 1), nrow = df), simplify = F)
-  X <- sapply(Betas, function(beta) {apply(H, 1, function(h) f_hermite(h, beta, 1:q))})
-})
-
-X <- as.vector(X)
-H <- rep(H, max_df)
-df <- as.factor(rep(paste('df =', 1:max_df), each = n))
-
-herm_df <- data.frame(X, H, df)
-gg_herm <- ggplot(herm_df, aes(x = H, y = X)) + 
-  geom_line() + 
-  facet_grid(~df) + 
-  theme_bw()
-gg_herm
-ggsave(filename = "simulation_study/figures_nl/herm.jpeg", plot = gg_herm, width = 10, height = 4)
-
 # Example simulations
 set.seed(42)
 p <- 30
@@ -156,16 +82,7 @@ dep <- partDependence(fit, js[1], mc.cores = mc.cores)
 fit2 <- SDForest(x = X, y = Y, Q_type = 'no_deconfounding', mc.cores = mc.cores)
 dep2 <- partDependence(fit2, js[1], mc.cores = mc.cores)
 
-# Comparison of Variable importance
-imp_1 <- fit$var_importance / max(fit$var_importance)
-imp_2 <- fit2$var_importance / max(fit2$var_importance)
-true_imp <- rep('spurious     ', length(imp_1))
-true_imp[js] <- 'causal'
-
-imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_imp))
-
 # Quantitative performance comparison
-error_name <- expression("||"*f^0*(x[test]) - widehat(f(x[test]))*"||"[2]^2 / n[test])
 
 performance_measure <- function(n, p, q, n_test){
   data <- simulate_nonlinear_confounding(q = q, p = p, n = n+n_test, m = 4, df = 4)
@@ -189,65 +106,5 @@ perf <- replicate(10, sapply(performance_measure(n, p, q, 500),
 perf <- t(perf)
 
 perf_g <- gather(data.frame(perf), key = 'method', value = 'performance')
-save(perf_g, fit, fit2, dep, dep2,
+save(perf_g, fit, fit2, dep, dep2, sing, df, js, X, Y, f_X,
      file = "simulation_study/results/nonlin_confounding.RData")
-
-# Plots
-gg_sing <- ggplot(sing, aes(x = i, y = d)) + 
-  geom_point(aes()) + ylab(expression(lambda[i])) + 
-  theme_bw()
-gg_sing
-ggsave(filename = "simulation_study/figures_nl/sing.jpeg", plot = gg_sing, width = 7, height = 3)
-
-plain <- ggplot(df, aes(y = f, x = Y)) + 
-  geom_point(size = 0.4) + theme_bw() + 
-  ylab("f(X)")
-
-transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
-  geom_point(size = 0.4) + theme_bw() + 
-  ylab("Qf(X)")
-
-pt <- grid.arrange(plain, transformed)
-ggsave(filename = "simulation_study/figures_nl/pt_nl.jpeg", plot = pt, width = 5, height = 10)
-
-ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('') + 
-  ylab('') + scale_color_tron() + ggtitle('Normalized to [0, 1]') + 
-  theme(legend.title = element_blank())
-
-ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('') + 
-  ylab('') + scale_color_tron() + ggtitle('Logarithmic scale') + 
-  theme(legend.title = element_blank())
-
-gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
-                                     left = 'Variable importance ranger', 
-                                     bottom = 'Variable importance SDForest')
-ggsave(filename = "simulation_study/figures_nl/imp_nl.jpeg", plot = gg_imp, width = 10, height = 4)
-
-gg_dep <- plot(dep) + geom_point(aes(x = X[, js[1]], y = Y), size = 0.2)
-
-sample_examples <- sample(1:ncol(dep2$preds), 19)
-for(i in sample_examples){
-  pred_data <- data.frame(x = dep2$x_seq, y = dep2$preds[, i])
-  gg_dep <- gg_dep + ggplot2::geom_line(data = pred_data, 
-                                        ggplot2::aes(x = x, y = y), col = 'lightblue')
-}
-gg_dep <- gg_dep + 
-  geom_line(aes(x = dep2$x_seq, y = dep2$preds_mean, col = 'rf')) + 
-  geom_point(aes(x = X[, js[1]], y = f_X, col = 'true'), size = 0.2) +   
-  ggplot2::labs(col = "") + 
-  ggplot2::scale_color_manual(values = c(true = "red", rf = "blue"), 
-                              labels = c(true = "True Function", 
-                                         rf = "no deconfounding"))
-gg_dep
-ggsave(filename = "simulation_study/figures_nl/dep_nl.jpeg", plot = gg_dep, width = 5, height = 5)
-
-
-gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + 
-  scale_fill_tron() + ylab(error_name) + xlab('') +
-  theme(legend.position = 'None')
-
-gg_perf
-ggsave(filename = "simulation_study/figures_nl/perf_nl.jpeg", plot = gg_perf, width = 5, height = 5)

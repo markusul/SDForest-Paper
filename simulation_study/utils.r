@@ -2,7 +2,7 @@ library(SDForest)
 library(ranger)
 library(parallel)
 
-mc.cores <- 1
+mc.cores <- 100
 
 performance_measure <- function(n, p, q, n_test, eff, fixEff = FALSE){
     data <- simulate_data_nonlinear(q = q, p = p, n = n+n_test, m = 4, eff = eff, fixEff = fixEff)

@@ -9,7 +9,7 @@ n_test <- 500
 
 N_rep <- 10
 
-seq_ <- seq(4, 150, 10)
+seq_ <- c(4, seq(10, 100, 10))
 
 print('start')
 start <- Sys.time()

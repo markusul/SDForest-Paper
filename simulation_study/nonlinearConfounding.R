@@ -90,10 +90,10 @@ performance_measure <- function(n, p, q, n_test){
   data_test <- data.frame(data$X[(n+1):(n+n_test),], Y = data$Y[(n+1):(n+n_test)])
   
   fit <- SDForest(Y ~ ., data_train, mc.cores = mc.cores)
-  fit2 <- SDForest(Y ~ ., data_train, Q_type = "no_deconfounding", mc.cores = mc.cores)
-  
   pred <- predict(fit, data_test)
-  pred2 <- predict(fit2, data_test)
+
+  fit <- SDForest(Y ~ ., data_train, Q_type = "no_deconfounding", mc.cores = mc.cores)
+  pred2 <- predict(fit, data_test)
   
   mse <- (data$f_X[(n+1):(n+n_test)] - pred)
   mse2 <- (data$f_X[(n+1):(n+n_test)] - pred2)
@@ -101,7 +101,7 @@ performance_measure <- function(n, p, q, n_test){
   return(list(SDF = mse, RF= mse2))
 }
 
-perf <- replicate(100, sapply(performance_measure(n, p, q, 500), 
+perf <- sapply(1:100, function(i) sapply(performance_measure(n, p, q, 500), 
                               function(x)mean(x**2)))
 perf <- t(perf)
 

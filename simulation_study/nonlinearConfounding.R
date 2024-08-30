@@ -4,6 +4,7 @@ library(ggplot2)
 library(gridExtra)
 library(ggsci)
 library(tidyr)
+library(parallel)
 
 mc.cores <- 100
 
@@ -89,10 +90,10 @@ performance_measure <- function(n, p, q, n_test){
   data_train <- data.frame(data$X[1:n,], Y = data$Y[1:n])
   data_test <- data.frame(data$X[(n+1):(n+n_test),], Y = data$Y[(n+1):(n+n_test)])
   
-  fit <- SDForest(Y ~ ., data_train, mc.cores = mc.cores)
+  fit <- SDForest(Y ~ ., data_train, mc.cores = 1)
   pred <- predict(fit, data_test)
 
-  fit <- SDForest(Y ~ ., data_train, Q_type = "no_deconfounding", mc.cores = mc.cores)
+  fit <- SDForest(Y ~ ., data_train, Q_type = "no_deconfounding", mc.cores = 1)
   pred2 <- predict(fit, data_test)
   
   mse <- (data$f_X[(n+1):(n+n_test)] - pred)
@@ -101,9 +102,9 @@ performance_measure <- function(n, p, q, n_test){
   return(list(SDF = mse, RF= mse2))
 }
 
-perf <- sapply(1:100, function(i) sapply(performance_measure(n, p, q, 500), 
-                              function(x)mean(x**2)))
-perf <- t(perf)
+perf <- mclapply(1:100, function(i) sapply(performance_measure(n, p, q, 500), 
+                              function(x)mean(x**2)), mc.cores = mc.cores)
+perf <- do.call(rbind, perf)
 
 perf_g <- gather(data.frame(perf), key = 'method', value = 'performance')
 save(perf_g, fit, fit2, dep, dep2, sing, df, js, X, Y, f_X,

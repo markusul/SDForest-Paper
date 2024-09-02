@@ -573,7 +573,9 @@ gg_dep <- gg_dep +
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c(true = "red", rf = "blue"), 
                               labels = c(true = "True Function", 
-                                         rf = "no deconfounding"))
+                                         rf = "no deconfounding")) +
+  theme(legend.position = 'bottom') + 
+  xlim(c(-5, 5))
 gg_dep
 ggsave(filename = "simulation_study/figures_nl/dep_nl.jpeg", plot = gg_dep, width = 5, height = 5)
 
@@ -585,3 +587,17 @@ gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
 
 gg_perf
 ggsave(filename = "simulation_study/figures_nl/perf_nl.jpeg", plot = gg_perf, width = 5, height = 5)
+
+
+#### fast comparison ####
+load('simulation_study/results/fast.RData')
+
+gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + 
+  scale_fill_tron() + ylab(error_name) + xlab('') +
+  theme(legend.position = 'None')
+
+gg_perf
+ggsave(filename = "simulation_study/figures/perf_fast.jpeg", plot = gg_perf, width = 5, height = 5)
+
+

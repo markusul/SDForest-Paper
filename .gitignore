@@ -1,7 +1,8 @@
 /slurm
 /outfiles
 /simulation_study/results
-/data
+/motif/data
+/motif/results
 
 # History files
 .Rhistory

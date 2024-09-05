@@ -18,7 +18,7 @@ performance_measure <- function(n, p, q, n_test){
   mse <- (data$f_X[(n+1):(n+n_test)] - pred)
   mse2 <- (data$f_X[(n+1):(n+n_test)] - pred2)
   
-  return(list(SDT = mse, SDT2= mse2))
+  return(list(SDT1 = mse, SDT2= mse2))
 }
 
 

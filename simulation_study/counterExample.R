@@ -12,7 +12,7 @@ simulate_data_counter <- function(q, p, n){
   # random confounding covariates H
   H <- matrix(rnorm(n * q, 0, 1), nrow = n)
   
-  beta <- runif(q, -1, 1)
+  beta <- runif(q, -0.01, 0.01)
   
   # random correlation matrix cov(X, H)
   Gamma <- matrix(rnorm(q * p, 0, 1), nrow = q)
@@ -37,7 +37,6 @@ simulate_data_counter <- function(q, p, n){
   #return data
   list(X = X, Y = Y, f_X = f_X, beta = beta, H = H)
 }
-
 
 # Example simulations
 set.seed(42)

@@ -41,9 +41,9 @@ simulate_data_counter <- function(q, p, n){
 
 # Example simulations
 set.seed(42)
-p <- 30
+p <- 300
 q <- 1
-n <- 50
+n <- 500
 
 # Quantitative performance comparison
 performance_measure <- function(n, p, q, n_test){

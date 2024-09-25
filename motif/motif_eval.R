@@ -60,3 +60,7 @@ dep_plain278 <- partDependence(fit_plain_pruned, 278)
 plot(dep_dec278)
 plot(dep2_dec278)
 plot(dep_plain278)
+
+idx <- which(imp_dec_pruned %in% sort(imp_dec_pruned, decreasing = T)[1:20])
+hist(apply(motifs, 2, var), breaks = 100)
+idx

@@ -3,8 +3,6 @@ library(SDForest)
 np <- import("numpy")
 
 npz1 <- np$load("cBench/data/dataset_rpe1_filtered.npz")
-npz1$files
-npz1$f[['var_names']]
 interventions <- npz1$f[['interventions']]
 
 response <- "ENSG00000173812"

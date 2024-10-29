@@ -3,6 +3,8 @@
 /simulation_study/results
 /motif/data
 /motif/results
+/cBench/data
+/cBench/results
 
 # History files
 .Rhistory

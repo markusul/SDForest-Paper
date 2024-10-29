@@ -116,14 +116,16 @@ df <- data.frame(f, Y, QY, Qf)
 
 plain <- ggplot(df, aes(y = f, x = Y)) + 
   geom_point(size = 0.2) + theme_bw() + 
-  ylab("f(X)")
+  ylab("f(X)") + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red")
 
 transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
   geom_point(size = 0.2) + theme_bw() + 
-  ylab("Qf(X)")
+  ylab("Qf(X)") + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red")
 
-pt <- grid.arrange(plain, transformed)
-ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 3, height = 6)
+pt <- grid.arrange(plain, transformed, ncol = 2)
+ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 6, height = 3)
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')
@@ -267,7 +269,7 @@ ggsave(filename = "simulation_study/figures/paths.jpeg",
        plot = gg_paths, width = 10, height = 4)
 
 ##### Performance depending on the dimensions #####
-error_name <- expression("||"*f^0*(x[test]) - widehat(f(x[test]))*"||"[2]^2 / n[test])
+error_name <- expression("||"*f^0*(x[test]) - hat(f)(x[test])*"||"[2]^2 / n[test])
 annot_x_shift <- 0.23
 annot_y_shift <- 1
 
@@ -589,6 +591,80 @@ gg_perf
 ggsave(filename = "simulation_study/figures_nl/perf_nl.jpeg", plot = gg_perf, width = 5, height = 5)
 
 
+# nonlinear confounding with fourier
+load('simulation_study/results/nonlin_confounding_2.RData')
+
+gg_sing <- ggplot(sing, aes(x = i, y = d)) + 
+  geom_point(aes()) + ylab(expression(lambda[i])) + 
+  theme_bw()
+gg_sing
+ggsave(filename = "simulation_study/figures_nl/sing2.jpeg", plot = gg_sing, width = 7, height = 3)
+
+
+plain <- ggplot(df, aes(y = f, x = Y)) + 
+  geom_point(size = 0.4) + theme_bw() + 
+  ylab("f(X)")
+
+transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
+  geom_point(size = 0.4) + theme_bw() + 
+  ylab("Qf(X)")
+
+pt <- grid.arrange(plain, transformed)
+ggsave(filename = "simulation_study/figures_nl/pt_nl2.jpeg", plot = pt, width = 5, height = 10)
+
+# Comparison of Variable importance
+imp_1 <- fit$var_importance / max(fit$var_importance)
+imp_2 <- fit2$var_importance / max(fit2$var_importance)
+true_imp <- rep('spurious     ', length(imp_1))
+true_imp[js] <- 'causal'
+
+imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_imp))
+
+ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, col = Covariates)) + 
+  geom_point(size = 0.5) + theme_bw() + xlab('') + 
+  ylab('') + scale_color_tron() + ggtitle('Normalized to [0, 1]') + 
+  theme(legend.title = element_blank())
+
+ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariates)) + 
+  geom_point(size = 0.5) + theme_bw() + xlab('') + 
+  ylab('') + scale_color_tron() + ggtitle('Logarithmic scale') + 
+  theme(legend.title = element_blank())
+
+gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
+                                     left = 'Variable importance ranger', 
+                                     bottom = 'Variable importance SDForest')
+ggsave(filename = "simulation_study/figures_nl/imp_nl2.jpeg", plot = gg_imp, width = 10, height = 4)
+
+gg_dep <- plot(dep) + geom_point(aes(x = X[, js[1]], y = Y), size = 0.2)
+
+sample_examples <- sample(1:ncol(dep2$preds), 19)
+for(i in sample_examples){
+  pred_data <- data.frame(x = dep2$x_seq, y = dep2$preds[, i])
+  gg_dep <- gg_dep + ggplot2::geom_line(data = pred_data, 
+                                        ggplot2::aes(x = x, y = y), col = 'lightblue')
+}
+gg_dep <- gg_dep + 
+  geom_line(aes(x = dep2$x_seq, y = dep2$preds_mean, col = 'rf')) + 
+  geom_point(aes(x = X[, js[1]], y = f_X, col = 'true'), size = 0.2) +   
+  ggplot2::labs(col = "") + 
+  ggplot2::scale_color_manual(values = c(true = "red", rf = "blue"), 
+                              labels = c(true = "True Function", 
+                                         rf = "no deconfounding")) +
+  theme(legend.position = 'bottom') + 
+  xlim(c(-5, 5))
+gg_dep
+ggsave(filename = "simulation_study/figures_nl/dep_nl2.jpeg", plot = gg_dep, width = 5, height = 5)
+
+
+gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + 
+  scale_fill_tron() + ylab(error_name) + xlab('') +
+  theme(legend.position = 'None')
+
+gg_perf
+ggsave(filename = "simulation_study/figures_nl/perf_nl2.jpeg", plot = gg_perf, width = 5, height = 5)
+
+
 #### fast comparison ####
 load('simulation_study/results/fast.RData')
 
@@ -600,4 +676,17 @@ gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
 gg_perf
 ggsave(filename = "simulation_study/figures/perf_fast.jpeg", plot = gg_perf, width = 5, height = 5)
 
+
+
+
+load('simulation_study/results/counterExample.RData')
+perf_g$performance
+
+gg_perf <- ggplot(perf_g, aes(y = log(performance), x = method, fill = method)) +
+  geom_boxplot(outlier.size = 0.4) + theme_bw() + 
+  scale_fill_tron() + ylab(error_name) + xlab('') +
+  theme(legend.position = 'None')
+
+gg_perf
+ggsave(filename = "simulation_study/figures/counter.jpeg", plot = gg_perf, width = 5, height = 5)
 

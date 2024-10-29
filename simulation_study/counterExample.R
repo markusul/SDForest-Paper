@@ -18,7 +18,7 @@ simulate_data_counter <- function(q, p, n){
   Gamma <- matrix(rnorm(q * p, 0, 1), nrow = q)
   
   # random coefficient vector delta
-  delta <- rnorm(q, 0, 1)
+  #delta <- rnorm(q, 0, 1)
   
   # random error term
   E <- matrix(rnorm(n * p, 0, 1), nrow = n)
@@ -32,7 +32,7 @@ simulate_data_counter <- function(q, p, n){
   f_X <- X %*% t(Gamma ^ (-1)) %*% beta
   
   # generate Y
-  Y <- f_X + H %*% delta + rnorm(n, 0, 0.1)
+  Y <- f_X + rnorm(n, 0, 0.1)
   
   #return data
   list(X = X, Y = Y, f_X = f_X, beta = beta, H = H)

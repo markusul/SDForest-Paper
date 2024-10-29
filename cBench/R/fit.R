@@ -1,6 +1,5 @@
-
-library(SDForest)
 library(reticulate)
+library(SDForest)
 np <- import("numpy")
 
 npz1 <- np$load("cBench/data/dataset_rpe1_filtered.npz")
@@ -19,13 +18,14 @@ colnames(X) <- npz1$f[['var_names']]
 Y <- X[, response]
 X <- X[, -which(colnames(X) == response)]
 
-fitsdf <- SDForest(x = X, y = Y, nTree = 100, gpu = TRUE, max_size = 1000)
-plot(fitsdf$var_importance)
-fitplain <- SDForest(x = X, y = Y, nTree = 100, gpu = TRUE, max_size = 1000, Q_type = "no_deconfounding")
+#RhpcBLASctl::omp_set_num_threads(1)
 
-plot(fitsdf$var_importance, fitplain$var_importance)
+fitsdf <- SDForest(x = X, y = Y, nTree = 100, mc.cores = 100)
+fitsdf <- toList(fitsdf)
 
-sort(fitsdf$var_importance, decreasing = T)[1:10]
+fitplain <- SDForest(x = X, y = Y, nTree = 100, mc.cores = 100,
+                     Q_type = "no_deconfounding")
+fitplain <- toList(fitplain)
 
+save(fitplain, fitsdf, file = 'cBench/results/fits.Rdata')
 
-path <- regPath(fitsdf)

@@ -19,11 +19,14 @@ print("Fitting SDForest")
 fitsdf <- SDForest(x = X, y = Y, nTree = 100, mc.cores = 100)
 fitsdf <- toList(fitsdf)
 
+print("Saving results")
+save(fitsdf, file = paste0('cBench/results_rpe1/', response, '_sdf.Rdata'))
+
 print("Fitting SDForest with no deconfounding")
 fitplain <- SDForest(x = X, y = Y, nTree = 100, mc.cores = 100,
                      Q_type = "no_deconfounding")
 fitplain <- toList(fitplain)
 
 print("Saving results")
-save(fitplain, fitsdf, file = paste0('cBench/results_rpe1/', response, '.Rdata'))
+save(fitplain, file = paste0('cBench/results_rpe1/', response, '_plain.Rdata'))
 

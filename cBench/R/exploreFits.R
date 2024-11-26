@@ -50,11 +50,12 @@ colnames(X) <- npz1$f[['var_names']]
 dim(X)
 
 Y <- X[, response]
-Y_obs <- Y[interventions == 'non-targeting']
+Y_obs <- Y[interventions == 'excluded']
 Fo <- ecdf(Y_obs)
 
-plot(svd(scale(X[interventions == 'non-targeting', ]))$d)
-plot(svd(scale(X[interventions == 'non-targeting', ], scale = F))$d)
+plot(svd(scale(X[interventions == 'excluded', ]))$d)
+plot(svd(scale(X[interventions == 'excluded', ], scale = F))$d)
+points(svd(scale(X[interventions == 'non-targeting', ], scale = F))$d, col = 2)
 
 #load(file = 'cBench/results_rpe1/ENSG00000173812_sdf.Rdata')
 #load(file = 'cBench/results_rpe1/ENSG00000173812_plain.Rdata')
@@ -89,11 +90,23 @@ plot(svd(scale(X[interventions == 'non-targeting', ], scale = F))$d)
 #save(fitsdf, file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns_pruned.Rdata')
 
 
+load(file = 'cBench/results_rpe1_ex_sub/ENSG00000173812_sdf.Rdata')
+load(file = 'cBench/results_rpe1_ex_sub/ENSG00000173812_plain.Rdata')
+
+fitsdf <- fromList(fitsdf)
+path <- regPath(fitsdf)
+
+
+
 load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_pruned.Rdata')
 load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns_pruned.Rdata')
 load(file = 'cBench/results_rpe1/ENSG00000173812_plain_pruned_imp.Rdata')
 
 imp_sdf <- fitsdf$var_importance
+imp_plain <- fitsdf$var_importance
+
+fit_plain <- ranger()
+
 
 plot(imp_plain, imp_sdf)
 plot(log(imp_plain), log(imp_sdf))

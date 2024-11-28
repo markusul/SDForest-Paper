@@ -12,6 +12,7 @@ wass <- function(Fo, Y_int){
 
 wass_xj <- function(Fo, Y, xj, interventions){
   idx <- interventions == xj
+  if(sum(idx) == 0) return(NA)
   wass(Fo, Y[idx])
 }
 
@@ -45,11 +46,17 @@ sum(interventions == 'excluded')
 sum(interventions == 'non-targeting')
 response <- "ENSG00000173812"
 
-X <- npz1$f[['expression_matrix']]
-colnames(X) <- npz1$f[['var_names']]
-dim(X)
+npz1 <- np$load("cBench/data/dataset_k562_filtered.npz")
+interventions <- npz1$f[['interventions']]
 
+response <- "ENSG00000173812"
+
+X <- npz1$f[['expression_matrix']]
+X <- X[interventions == 'non-targeting', ]
+colnames(X) <- npz1$f[['var_names']]
 Y <- X[, response]
+X <- X[, -which(colnames(X) == response)]
+
 Y_obs <- Y[interventions == 'excluded']
 Fo <- ecdf(Y_obs)
 
@@ -98,14 +105,16 @@ path <- regPath(fitsdf)
 
 
 
-load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_pruned.Rdata')
-load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns_pruned.Rdata')
-load(file = 'cBench/results_rpe1/ENSG00000173812_plain_pruned_imp.Rdata')
+#load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_pruned.Rdata')
+#load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns_pruned.Rdata')
+#load(file = 'cBench/results_rpe1/ENSG00000173812_plain_pruned_imp.Rdata')
 
 imp_sdf <- fitsdf$var_importance
-imp_plain <- fitsdf$var_importance
 
-fit_plain <- ranger()
+
+library(ranger)
+fit_plain <- ranger(x = X, y = Y, importance = 'impurity')
+imp_plain <- fit_plain$variable.importance
 
 
 plot(imp_plain, imp_sdf)
@@ -117,7 +126,7 @@ imp_sdf_sort <- sort(imp_sdf, decreasing = T)
 imp_plain_sort <- sort(imp_plain, decreasing = T)
 
 
-top <- 20
+top <- 2
 
 sum(imp_sdf == 0)
 plot(imp_plain, imp_sdf)
@@ -139,16 +148,17 @@ wDist <- sapply(var_names, function(xj) wass_xj(Fo, Y, xj, interventions))
 effDist <- sapply(var_names, function(xj) eff_xj(Y_obs, Y, xj, interventions))
 
 plot(wDist, imp_plain)
-plot(wDist, imp_sdf)
+plot(log(wDist), log(imp_sdf))
 
 cor.test(wDist, imp_plain)
-cor.test(wDist, imp_sdf)
+cor.test(log(wDist), log(imp_sdf))
 
 plot(effDist, imp_plain)
-plot(effDist, imp_sdf)
+plot(log(effDist), log(imp_sdf))
+grid()
 
 cor.test(effDist, imp_plain)
-cor.test(effDist, imp_sdf)
+cor.test(log(effDist), log(imp_sdf))
 
 
 
@@ -213,6 +223,21 @@ mean(pred_sdf[x == 0])
 
 
 
+
+plot(X[interventions == 'excluded', o_sdf[1]], X[interventions == 'excluded', response], col = 2)
+points(X[interventions == 'non-targeting', o_sdf[1]], X[interventions == 'non-targeting', response], )
+points(X[interventions == o_sdf[1], o_sdf[1]], X[interventions == o_sdf[1], response], col = 3)
+points(X[interventions == o_sdf[2], o_sdf[1]], X[interventions == o_sdf[2], response], col = 4)
+
+pred_plain <- predict(fit_plain, X)
+points(X[, o_sdf[1]], pred_plain$predictions, col = 5)
+
+pred_sdf <- predict(fitsdf, as.data.frame(X))
+points(X[, o_sdf[1]], pred_sdf, col = 6)
+
+
+
+interventions  == o_sdf[1]
 
 
 

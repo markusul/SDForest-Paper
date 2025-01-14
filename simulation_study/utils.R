@@ -1,4 +1,4 @@
-library(SDForest)
+library(SDModels)
 library(ranger)
 library(parallel)
 

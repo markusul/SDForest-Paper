@@ -1,7 +1,7 @@
 args = commandArgs(trailingOnly = TRUE)
 set.seed(as.numeric(args[1]))
 
-source('simulation_study/utils.r')
+source('simulation_study/utils.R')
 
 p <- 500
 q <- 20

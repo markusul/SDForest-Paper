@@ -1,4 +1,4 @@
-library(SDForest)
+library(SDModels)
 library(parallel)
 library(tidyr)
 

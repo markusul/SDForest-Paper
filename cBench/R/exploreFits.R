@@ -1,4 +1,68 @@
+library(reticulate)
 library(SDForest)
+np <- import("numpy")
+
+wass <- function(Fo, Y_int){
+  
+  Fi <- ecdf(Y_int)
+  tempf <- function(x) abs(Fo(x) - Fi(x))
+  val <- integrate(tempf,-Inf,Inf, subdivisions = 10000)$value
+  return(val)
+}
+
+wass_xj <- function(Fo, Y, xj, interventions){
+  idx <- interventions == xj
+  if(sum(idx) == 0) return(NA)
+  wass(Fo, Y[idx])
+}
+
+wass2_xj <- function(Fo, Y, xj, interventions){
+  idx <- interventions == xj
+  wass2(Fo, Y[idx])
+}
+
+wass2 <- function(Y_obs, Y_int, p = 2){
+  print(3)
+  tempf <- function(x) abs(quantile(Y_obs, x, type = 5) - quantile(Y_int, x, type = 5))**p
+  val <- integrate(tempf,0,1, subdivisions = 1000)$value **(1/p)
+  return(val)
+}
+
+eff <- function(y_obs, y_int){
+  (median(y_obs) - median(y_int))**2
+}
+
+
+eff_xj <- function(Y_obs, Y, xj, interventions){
+  idx <- interventions == xj
+  eff(Y_obs, 
+      Y[idx])
+}
+
+
+npz1 <- np$load("cBench/data/dataset_rpe1_filtered.npz")
+interventions <- npz1$f[['interventions']]
+sum(interventions == 'excluded')
+sum(interventions == 'non-targeting')
+response <- "ENSG00000173812"
+
+npz1 <- np$load("cBench/data/dataset_k562_filtered.npz")
+interventions <- npz1$f[['interventions']]
+
+response <- "ENSG00000173812"
+
+X <- npz1$f[['expression_matrix']]
+X <- X[interventions == 'non-targeting', ]
+colnames(X) <- npz1$f[['var_names']]
+Y <- X[, response]
+X <- X[, -which(colnames(X) == response)]
+
+Y_obs <- Y[interventions == 'excluded']
+Fo <- ecdf(Y_obs)
+
+plot(svd(scale(X[interventions == 'excluded', ]))$d)
+plot(svd(scale(X[interventions == 'excluded', ], scale = F))$d)
+points(svd(scale(X[interventions == 'non-targeting', ], scale = F))$d, col = 2)
 
 #load(file = 'cBench/results_rpe1/ENSG00000173812_sdf.Rdata')
 #load(file = 'cBench/results_rpe1/ENSG00000173812_plain.Rdata')
@@ -22,33 +86,92 @@ library(SDForest)
 #fitsdf <- prune(fitsdf, 0.002)
 #save(fitsdf, file = 'cBench/results_rpe1/ENSG00000173812_sdf_pruned.Rdata')
 
+#load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns.Rdata')
+#fitsdf <- fromList(fitsdf)
+#path <- regPath(fitsdf)
+#plotOOB(path)
+#path$cp_min
+# 0.003
 
-load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_pruned.Rdata')
-load(file = 'cBench/results_rpe1/ENSG00000173812_plain_pruned_imp.Rdata')
+#fitsdf <- prune(fitsdf, 0.003)
+#save(fitsdf, file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns_pruned.Rdata')
+
+
+load(file = 'cBench/results_rpe1_ex_sub/ENSG00000173812_sdf.Rdata')
+load(file = 'cBench/results_rpe1_ex_sub/ENSG00000173812_plain.Rdata')
+
+fitsdf <- fromList(fitsdf)
+path <- regPath(fitsdf)
+
+
+
+#load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_pruned.Rdata')
+#load(file = 'cBench/results_rpe1/ENSG00000173812_sdf_ns_pruned.Rdata')
+#load(file = 'cBench/results_rpe1/ENSG00000173812_plain_pruned_imp.Rdata')
 
 imp_sdf <- fitsdf$var_importance
 
+
+library(ranger)
+fit_plain <- ranger(x = X, y = Y, importance = 'impurity')
+imp_plain <- fit_plain$variable.importance
+
+
 plot(imp_plain, imp_sdf)
-length(imp_plain)
+plot(log(imp_plain), log(imp_sdf))
 
 names(imp_sdf) <- fitsdf$var_names
-sort(imp_sdf, decreasing = T)[1:5]
+names(imp_plain) <- fitsdf$var_names
+imp_sdf_sort <- sort(imp_sdf, decreasing = T)
+imp_plain_sort <- sort(imp_plain, decreasing = T)
 
-library(reticulate)
-library(SDForest)
-np <- import("numpy")
 
-npz1 <- np$load("cBench/data/dataset_rpe1_filtered.npz")
-interventions <- npz1$f[['interventions']]
+top <- 2
 
-sort(imp_sdf, decreasing = T)[1:5]
-response <- "ENSG00000173812"
+sum(imp_sdf == 0)
+plot(imp_plain, imp_sdf)
+grid()
+abline(h = imp_sdf_sort[top])
+abline(v = imp_plain_sort[top])
 
-xj <- names(sort(imp_sdf, decreasing = T))[3]
-xj <- "ENSG00000108654"
 
-X <- npz1$f[['expression_matrix']]
-colnames(X) <- npz1$f[['var_names']]
+plot(log(imp_plain), log(imp_sdf))
+grid()
+abline(h = log(imp_sdf_sort[top]))
+abline(v = log(imp_plain_sort[top]))
+
+var_names <- fitsdf$var_names
+o_sdf <- var_names[imp_sdf >= imp_sdf_sort[top] & imp_plain < imp_plain_sort[top]]
+o_plain <- var_names[imp_plain >= imp_plain_sort[top] & imp_sdf < imp_sdf_sort[top]]
+
+wDist <- sapply(var_names, function(xj) wass_xj(Fo, Y, xj, interventions))
+effDist <- sapply(var_names, function(xj) eff_xj(Y_obs, Y, xj, interventions))
+
+plot(wDist, imp_plain)
+plot(log(wDist), log(imp_sdf))
+
+cor.test(wDist, imp_plain)
+cor.test(log(wDist), log(imp_sdf))
+
+plot(effDist, imp_plain)
+plot(log(effDist), log(imp_sdf))
+grid()
+
+cor.test(effDist, imp_plain)
+cor.test(log(effDist), log(imp_sdf))
+
+
+
+mean(sapply(o_sdf, function(xj) wass_xj(Fo, Y, xj, interventions)))
+mean(sapply(o_plain, function(xj) wass_xj(Fo, Y, xj, interventions)))
+
+mean(sapply(o_sdf, function(xj) eff_xj(Y_obs, Y, xj, interventions)))
+mean(sapply(o_plain, function(xj) eff_xj(Y_obs, Y, xj, interventions)))
+
+
+Y[interventions == names(imp_plain_sort[3])]
+
+
 X_int <- X[interventions == xj, ]
 Y <- X_int[, response]
 x <- X_int[, xj]
@@ -99,26 +222,40 @@ mean(pred[x == 0])
 mean(pred_sdf[x == 0])
 
 
-plot(svd(scale(X_obs))$d)
 
-cEff <- function(y_obs, y_int, xj_obs, xj_int){
-  #(mean(y_obs[xj_obs == 0]) - mean(y_int[xj_int == 0]))**2
-  (mean(y_obs) - mean(y_int))**2
-}
 
-cEff_xj <- function(response, X, xj, interventions){
-  idx <- interventions == xj
-  cEff(X[interventions == 'non-targeting', response], 
-       X[idx, response], 
-       X[interventions == 'non-targeting', xj], 
-       X[idx, xj])
-}
+plot(X[interventions == 'excluded', o_sdf[1]], X[interventions == 'excluded', response], col = 2)
+points(X[interventions == 'non-targeting', o_sdf[1]], X[interventions == 'non-targeting', response], )
+points(X[interventions == o_sdf[1], o_sdf[1]], X[interventions == o_sdf[1], response], col = 3)
+points(X[interventions == o_sdf[2], o_sdf[1]], X[interventions == o_sdf[2], response], col = 4)
+
+pred_plain <- predict(fit_plain, X)
+points(X[, o_sdf[1]], pred_plain$predictions, col = 5)
+
+pred_sdf <- predict(fitsdf, as.data.frame(X))
+points(X[, o_sdf[1]], pred_sdf, col = 6)
+
+
+
+interventions  == o_sdf[1]
+
+
+
+
+
+
+
+
+
+
+
+transport::wasserstein(Y_obs, Y_int)
 
 X <- npz1$f[['expression_matrix']]
 colnames(X) <- npz1$f[['var_names']]
 
-mean(sapply(names(sort(imp_sdf, decreasing = T)[1:20]), 
-       function(xj) cEff_xj(response, X, xj, interventions)), na.rm = T)
+sapply(names(sort(imp_sdf, decreasing = T)[1:20]), 
+       function(xj) wass_xj(response, X, xj, interventions))
 
 names(imp_plain) <- fitsdf$var_names
 mean(sapply(names(sort(imp_plain, decreasing = T)[1:20]), 

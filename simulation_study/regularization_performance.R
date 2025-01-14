@@ -1,4 +1,4 @@
-library(SDForest)
+library(SDModels)
 library(parallel)
 
 set.seed(2024)

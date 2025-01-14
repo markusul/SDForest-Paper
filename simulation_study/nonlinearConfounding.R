@@ -1,5 +1,5 @@
 library(EQL)
-library(SDForest)
+library(SDModels)
 library(ggplot2)
 library(gridExtra)
 library(ggsci)

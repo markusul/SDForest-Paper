@@ -1,5 +1,4 @@
-#source("R/SDForest.r")
-library(SDForest)
+library(SDModels)
 mc.cores <- 100
 
 p <- 500

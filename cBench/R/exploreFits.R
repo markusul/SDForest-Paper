@@ -42,6 +42,7 @@ eff_xj <- function(Y_obs, Y, xj, interventions){
 
 npz1 <- np$load("cBench/data/dataset_rpe1_filtered.npz")
 interventions <- npz1$f[['interventions']]
+table(interventions)
 sum(interventions == 'excluded')
 sum(interventions == 'non-targeting')
 response <- "ENSG00000173812"

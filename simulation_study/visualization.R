@@ -297,9 +297,9 @@ perf_n <- lapply(paste0('simulation_study/results/perf_n/', files),
 
 perf_n <- do.call(rbind, perf_n)
 
-gg_n <- ggplot(perf_n, aes(x = seq, y = error, fill = method)) + 
+gg_n <- ggplot(perf_n, aes(x = seq, y = error, color = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of training samples') + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
+  ylab('') + scale_color_tron() + theme(legend.title=element_blank())
   
 gg_n <- gg_n + annotate(geom = "text", label = 'a)', 
                 x = ggplot_build(gg_n)$layout$panel_scales_x[[1]]$range_c$range[[1]] + annot_x_shift, 
@@ -315,9 +315,9 @@ perf_p <- lapply(paste0('simulation_study/results/perf_p/', files),
 
 perf_p <- do.call(rbind, perf_p)
 
-gg_p <- ggplot(perf_p, aes(x = seq, y = error, fill = method)) + 
+gg_p <- ggplot(perf_p, aes(x = seq, y = error, color = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of covariates') + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
+  ylab('') + scale_color_tron() + theme(legend.title=element_blank())
 
 gg_p <- gg_p + annotate(geom = "text", label = 'b)', 
                         x = ggplot_build(gg_p)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
@@ -333,9 +333,9 @@ perf_q <- lapply(paste0('simulation_study/results/perf_q/', files),
 
 perf_q <- do.call(rbind, perf_q)
 
-gg_q <- ggplot(perf_q, aes(x = seq, y = error, fill = method)) + 
+gg_q <- ggplot(perf_q, aes(x = seq, y = error, color = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of confounders') + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
+  ylab('') + scale_color_tron() + theme(legend.title=element_blank())
 
 gg_q <- gg_q + annotate(geom = "text", label = 'c)', 
                         x = ggplot_build(gg_q)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.05 + annot_x_shift, 
@@ -350,9 +350,9 @@ perf_eff <- lapply(paste0('simulation_study/results/perf_eff/', files),
 
 perf_eff <- do.call(rbind, perf_eff)
 
-gg_eff <- ggplot(perf_eff, aes(x = seq, y = error, fill = method)) + 
+gg_eff <- ggplot(perf_eff, aes(x = seq, y = error, color = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
+  ylab('') + scale_color_tron() + theme(legend.title=element_blank())
 
 gg_eff <- gg_eff + annotate(geom = "text", label = 'd)', 
                         x = ggplot_build(gg_eff)$layout$panel_scales_x[[1]]$range_c$range[[1]] + 0.5 + annot_x_shift, 
@@ -380,9 +380,9 @@ perf_dim$seq <- factor(perf_dim$seq, order = TRUE,
                        levels = as.character(sort(as.numeric(levels(perf_dim$seq)))))
 perf_dim$dim <- factor(perf_dim$dim, ordered = T, levels = dim_names)
 
-gg_dims2 <- ggplot(perf_dim, aes(x = seq, y = error, fill = method)) + 
+gg_dims2 <- ggplot(perf_dim, aes(x = seq, y = error, color = method)) + 
   geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("") + 
-  ylab(error_name) + scale_fill_tron() + facet_wrap(~dim, ncol = 2, scales="free") + 
+  ylab(error_name) + scale_color_tron() + facet_wrap(~dim, ncol = 2, scales="free") + 
   theme(legend.position = 'bottom', legend.title = element_blank())
 
 dat_text <- data.frame(
@@ -395,7 +395,7 @@ gg_dims2 <- gg_dims2 + geom_text(
   data    = dat_text,
   mapping = aes(x = -Inf, y = Inf, 
                 label = label, 
-                vjust = 1.5, hjust = -0.6), 
+                vjust = 1.5, hjust = -0.6), color = 'black'
 )
 gg_dims2
 
@@ -668,9 +668,9 @@ ggsave(filename = "simulation_study/figures_nl/perf_nl2.jpeg", plot = gg_perf, w
 #### fast comparison ####
 load('simulation_study/results/fast.RData')
 
-gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
+gg_perf <- ggplot(perf_g, aes(y = performance, x = method, color = method)) +
   geom_boxplot(outlier.size = 0.4) + theme_bw() + 
-  scale_fill_tron() + ylab(error_name) + xlab('') +
+  scale_color_tron() + ylab(error_name) + xlab('') +
   theme(legend.position = 'None')
 
 gg_perf

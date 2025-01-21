@@ -63,3 +63,9 @@ plot(dep_dec_ns278)
 plot(dep_plain278)
 
 
+
+plot(fit_plain$oob_predictions, fit_plain$oob_predictions -fit_plain$Y)
+
+plot(fit_dec$oob_predictions, fit_dec$oob_predictions -fit_dec$Y)
+
+

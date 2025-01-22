@@ -20,6 +20,8 @@ colnames(X) <- npz1$f[['var_names']]
 Y <- X[, response]
 X <- X[, -which(colnames(X) == response)]
 
+
+
 # load SDForest model trained on excluded interventions
 load(file = 'cBench/results_rpe1/ENSG00000173812_sdf.Rdata')
 fitsdf <- fromList(fitsdf)
@@ -188,3 +190,6 @@ gg_imp
 library(gridExtra)
 gg_same <- grid.arrange(gg_imp, gg_pred, ncol = 2)
 ggsave(filename = "simulation_study/figures/same.jpeg", plot = gg_same, width = 6, height = 3)
+
+Y <- Y[interventions == 'non-targeting']
+save(Y, file = "cBench/semiSimResults/Y.RData")

@@ -98,15 +98,32 @@ res <- lapply(1:25, function(j){
 semiDat <- do.call(rbind, res)
 semiDat$tau <- as.factor(semiDat$tau)
 
+# diff ranger sdf at tau = 0
+load(paste0(path, "predRob_1_1.RData"))
+diff_rangerSDF <- mean((preds_plain - preds_sdf)**2)
+diff_rangerSDF
+
 gg_rob <- ggplot(semiDat, aes(x = tau, y = rob, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
-  ylim(0, 1) + 
   theme_bw() +
   ylab("model change") + 
   scale_color_tron() +
+  geom_boxplot(aes(x = "0", y = diff_rangerSDF, col = 'SDF - ranger')) +
   theme(legend.title = element_blank())
+gg_rob
 ggsave(filename = "simulation_study/figures/SemiSim_rob.jpeg", 
        plot = gg_rob, width = 6, height = 4)
+
+gg_rob_log <- ggplot(semiDat, aes(x = tau, y = log(rob), col = method)) +
+  geom_boxplot(outlier.size = 0.4) + 
+  theme_bw() +
+  ylab("log model change") + 
+  scale_color_tron() +
+  geom_boxplot(aes(x = "0", y = log(diff_rangerSDF), col = 'SDF - ranger')) +
+  theme(legend.title = element_blank())
+gg_rob_log
+ggsave(filename = "simulation_study/figures/SemiSim_rob_log.jpeg", 
+       plot = gg_rob_log, width = 6, height = 4)
 
 gg_perf <- ggplot(semiDat, aes(x = tau, y = perf, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
@@ -116,10 +133,10 @@ gg_perf <- ggplot(semiDat, aes(x = tau, y = perf, col = method)) +
   scale_color_tron() +
   theme(legend.title = element_blank())
 
-
-gg_semiSim <- grid_arrange_shared_legend(gg_rob, gg_perf, ncol = 2)
+gg_semiSim <- grid_arrange_shared_legend(gg_rob, gg_rob_log, ncol = 2)
 ggsave(filename = "simulation_study/figures/SemiSim.jpeg", 
        plot = gg_semiSim, width = 10, height = 4)
+
 
 
 # performance with tau = 0

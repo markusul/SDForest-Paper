@@ -106,7 +106,7 @@ diff_rangerSDF
 gg_rob <- ggplot(semiDat, aes(x = tau, y = rob, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
   theme_bw() +
-  ylab("model change") + 
+  ylab("function change") + 
   scale_color_tron() +
   geom_boxplot(aes(x = "0", y = diff_rangerSDF, col = 'SDF - ranger')) +
   theme(legend.title = element_blank())
@@ -117,7 +117,7 @@ ggsave(filename = "simulation_study/figures/SemiSim_rob.jpeg",
 gg_rob_log <- ggplot(semiDat, aes(x = tau, y = log(rob), col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
   theme_bw() +
-  ylab("log model change") + 
+  ylab("log function change") + 
   scale_color_tron() +
   geom_boxplot(aes(x = "0", y = log(diff_rangerSDF), col = 'SDF - ranger')) +
   theme(legend.title = element_blank())

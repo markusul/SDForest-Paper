@@ -93,8 +93,7 @@ predict.ranger_fun <- function(object, newdata){
     return(predict(object$model, newdata)$predictions)
 }
 
-#source('R/SDForest.r')
-library(SDForest)
+library(SDModels)
 library(gridExtra)
 library(ggplot2)
 library(ranger)
@@ -179,6 +178,13 @@ gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
                            bottom = 'Variable importance SDForest')
 
 ggsave(filename = "simulation_study/figures/imp.jpeg", plot = gg_imp, width = 10, height = 4)
+
+ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariates)) + 
+  geom_point(size = 0.5) + theme_bw() + xlab('log Variable importance SDForest') + 
+  ylab('log Variable importance ranger') + scale_color_tron() + 
+  theme(legend.title = element_blank())
+ggimp_log
+ggsave(filename = "simulation_study/figures/imp_log.jpeg", plot = ggimp_log, width = 8, height = 5)
 
 ggdep1 <- plotDep(dep_1) + 
   geom_line(aes(x = dep_f_1$x_seq, y = dep_f_1$preds_mean, col = 'red'), linewidth = 0.2) + 
@@ -345,6 +351,8 @@ gg_q
 #### Density assumption ####
 files <- list.files('simulation_study/results/perf_eff')
 length(files)
+files <- paste0(1:10, ".RData")
+
 perf_eff <- lapply(paste0('simulation_study/results/perf_eff/', files), 
   load_perf, agg_fun = agg_fun)
 
@@ -401,22 +409,6 @@ gg_dims2
 
 ggsave(filename = "simulation_study/figures/dims2.jpeg", 
        plot = gg_dims2, width = 8, height = 6)
-
-
-#### limitations confounding fixed on causal parents
-files <- list.files('simulation_study/results/perf_limitations_1')
-length(files)
-perf_lim1 <- lapply(paste0('simulation_study/results/perf_limitations_1/', files), 
-                   load_perf, agg_fun = agg_fun)
-perf_lim1 <- do.call(rbind, perf_lim1)
-
-gg_lim1 <- ggplot(perf_lim1, aes(x = seq, y = error, fill = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
-  ylab('') + scale_fill_tron() + theme(legend.title=element_blank())
-gg_lim1
-
-ggsave(filename = "simulation_study/figures/lim1.jpeg", plot = gg_lim1, width = 6, height = 4)
-
 
 ##### Regularization performance #####
 

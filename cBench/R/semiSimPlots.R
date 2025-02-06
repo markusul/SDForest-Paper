@@ -75,16 +75,20 @@ res <- lapply(1:25, function(j){
     Preds_sdf[, i] <- preds_sdf
     tau_seq[i] <- tau
   }
-
+  
+  # change in ranger predictions
   rob_plain <- apply(Preds_plain, 2, 
                     function(pred) mean((pred - Preds_plain[, tau_seq == 0])**2))
 
+  # change in SDForest predictions
   rob_sdf <- apply(Preds_sdf, 2, 
                     function(pred) mean((pred - Preds_sdf[, tau_seq == 0])**2))
 
+  # change in ranger MSE
   perf_plain <- apply(Preds_plain, 2, 
                     function(pred) mean((pred - Y)**2))
 
+  # change in SDForest MSE
   perf_sdf <- apply(Preds_sdf, 2, 
                   function(pred) mean((pred - Y)**2))
 
@@ -103,6 +107,7 @@ load(paste0(path, "predRob_1_1.RData"))
 diff_rangerSDF <- mean((preds_plain - preds_sdf)**2)
 diff_rangerSDF
 
+# change in predictions
 gg_rob <- ggplot(semiDat, aes(x = tau, y = rob, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
   theme_bw() +
@@ -114,6 +119,7 @@ gg_rob
 ggsave(filename = "simulation_study/figures/SemiSim_rob.jpeg", 
        plot = gg_rob, width = 6, height = 4)
 
+# log change in predictions
 gg_rob_log <- ggplot(semiDat, aes(x = tau, y = log(rob), col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
   theme_bw() +
@@ -125,6 +131,7 @@ gg_rob_log
 ggsave(filename = "simulation_study/figures/SemiSim_rob_log.jpeg", 
        plot = gg_rob_log, width = 6, height = 4)
 
+# change in MSE
 gg_perf <- ggplot(semiDat, aes(x = tau, y = perf, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
   ylim(0, 1) + 
@@ -138,7 +145,6 @@ ggsave(filename = "simulation_study/figures/SemiSim.jpeg",
        plot = gg_semiSim, width = 10, height = 4)
 
 
-
 # performance with tau = 0
 mean(semiDat[semiDat$tau == 0 & semiDat$method == "ranger", "perf"])
 mean(semiDat[semiDat$tau == 0 & semiDat$method == "SDF", "perf"])
@@ -146,9 +152,4 @@ var(Y)
 
 1 - mean(semiDat[semiDat$tau == 0 & semiDat$method == "ranger", "perf"]) / var(Y)
 1 - mean(semiDat[semiDat$tau == 0 & semiDat$method == "SDF", "perf"]) / var(Y)
-
-
-load(paste0(path, "predRob_1_1.RData"))
-
-plot(preds_plain)
 

@@ -2,7 +2,14 @@
 
 This repository contains all the code used for the paper "[*Spectrally Deconfounded Random Forests*](https://arxiv.org/abs/2502.03969)" by Markus Ulmer, Cyrill Scheidegger, and Peter Bühlmann (2025).
 
-All the provided R-code uses the R-package [*SDModels*](https://markusul.github.io/SDModels/) v0.1, providing functionality to estimate SDForests and analyze the estimated functions.
+All the provided R-code uses the R-package [*SDModels*](https://markusul.github.io/SDModels/) v1.0.7, 
+providing functionality to estimate SDForests and analyze the estimated functions. 
+You can download this version from cran with `devtools::install_version("SDModels", version = "1.0.7", repos = "http://cran.us.r-project.org")`.
+
+All the simulations were run on the [*Euler*](https://scicomp.ethz.ch/wiki/Euler) using the batch jobs in the 
+`slurm` folder. See [*here*](https://scicomp.ethz.ch/wiki/Euler_applications_and_libraries_ubuntu) for details about the used libraries.
+
+The experiments will need the folders `simulation_study/results` and `cBench/semiSimResults` to save their output.
 
 -   `simulation_study` contains all the code to produce and visualize the simulations
 

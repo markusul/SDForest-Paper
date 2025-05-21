@@ -16,3 +16,9 @@ The experiments will need the folders `simulation_study/results` and `cBench/sem
 -   `cBench` contains all the code to produce and visualize the single-cell gene expression experiments
 
 -   the cBench data can be found here: <https://github.com/causalbench/causalbench>
+
+Reproducing the different figures.
+
+- Figure 3-6 run simulation_study/default_szenario.R
+- Figure 7 run slurm/dimensions.sh
+- Figure 8 run slurm/semiSim.sh

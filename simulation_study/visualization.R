@@ -116,15 +116,17 @@ df <- data.frame(f, Y, QY, Qf)
 plain <- ggplot(df, aes(y = f, x = Y)) + 
   geom_point(size = 0.2) + theme_bw() + 
   ylab("f(X)") + 
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red")
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
+  ylim(-4, 4) + xlim(-10, 10)
 
 transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
   geom_point(size = 0.2) + theme_bw() + 
   ylab("Qf(X)") + 
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red")
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
+  ylim(-4, 4) + xlim(-10, 10)
 
 pt <- grid.arrange(plain, transformed, ncol = 2)
-ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 6, height = 3)
+ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 10, height = 4)
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')
@@ -163,13 +165,15 @@ imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_
 
 
 
-ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('') + 
+ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, 
+                              col = Covariates, shape = Covariates)) + 
+  geom_point(size = 0.7) + theme_bw() + xlab('') + 
   ylab('') + scale_color_tron() + ggtitle('Normalized to [0, 1]') + 
   theme(legend.title = element_blank())
 
-ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('') + 
+ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), 
+                                  col = Covariates, shape = Covariates)) + 
+  geom_point(size = 0.7) + theme_bw() + xlab('') + 
   ylab('') + scale_color_tron() + ggtitle('Logarithmic scale') + 
   theme(legend.title = element_blank())
 
@@ -179,37 +183,44 @@ gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
 
 ggsave(filename = "simulation_study/figures/imp.jpeg", plot = gg_imp, width = 10, height = 4)
 
-ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('log Variable importance SDForest') + 
+ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), 
+                                  col = Covariates, shape = Covariates)) + 
+  geom_point(size = 0.7) + theme_bw() + xlab('log Variable importance SDForest') + 
   ylab('log Variable importance ranger') + scale_color_tron() + 
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank(), legend.position = "inside",
+        legend.position.inside=c(0.85,0.9)) + 
+  scale_shape_manual(values=c(3, 16))
 ggimp_log
-ggsave(filename = "simulation_study/figures/imp_log.jpeg", plot = ggimp_log, width = 8, height = 5)
+ggsave(filename = "simulation_study/figures/imp_log.jpeg", plot = ggimp_log, width = 5, height = 4)
 
 ggdep1 <- plotDep(dep_1) + 
-  geom_line(aes(x = dep_f_1$x_seq, y = dep_f_1$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_1$x_seq, y = dep_f_1$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 ggdep2 <- plotDep(dep_2) + 
-  geom_line(aes(x = dep_f_2$x_seq, y = dep_f_2$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_2$x_seq, y = dep_f_2$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 ggdep3 <- plotDep(dep_3) +
-  geom_line(aes(x = dep_f_3$x_seq, y = dep_f_3$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_3$x_seq, y = dep_f_3$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 ggdep4 <- plotDep(dep_4) +
-  geom_line(aes(x = dep_f_4$x_seq, y = dep_f_4$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_4$x_seq, y = dep_f_4$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 gg_cond_rf <- grid_arrange_shared_legend(ggdep1, ggdep2, ggdep3, ggdep4,
                            ncol = 2, nrow = 2, left = 'f(X)')
 ggsave(filename = "simulation_study/figures/cond_rf.jpeg", 
-       plot = gg_cond_rf, width = 8, height = 6)
+       plot = gg_cond_rf, width = 7, height = 6)
 
 ranger_fit <- ranger_fun(fit2)
 
@@ -219,53 +230,62 @@ dep_r_3 <- partDependence(ranger_fit, data$j[3], data.frame(data$X))
 dep_r_4 <- partDependence(ranger_fit, data$j[4], data.frame(data$X))
 
 ggdep1_r <- plotDep(dep_r_1) + 
-  geom_line(aes(x = dep_f_1$x_seq, y = dep_f_1$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_1$x_seq, y = dep_f_1$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 ggdep2_r <- plotDep(dep_r_2) +
-  geom_line(aes(x = dep_f_2$x_seq, y = dep_f_2$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_2$x_seq, y = dep_f_2$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 ggdep3_r <- plotDep(dep_r_3) + 
-  geom_line(aes(x = dep_f_3$x_seq, y = dep_f_3$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_3$x_seq, y = dep_f_3$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 ggdep4_r <- plotDep(dep_r_4) +
-  geom_line(aes(x = dep_f_4$x_seq, y = dep_f_4$preds_mean, col = 'red'), linewidth = 0.2) + 
+  geom_line(aes(x = dep_f_4$x_seq, y = dep_f_4$preds_mean, col = 'red'), 
+            linetype = 2, linewidth = 0.2) + 
   ggplot2::labs(col = "") + 
   ggplot2::scale_color_manual(values = c("red"), labels = c("True Function"))
 
 gg_cond_r <- grid_arrange_shared_legend(ggdep1_r, ggdep2_r, ggdep3_r, ggdep4_r,
                                          ncol = 2, nrow = 2, left = 'f(X)')
 ggsave(filename = "simulation_study/figures/cond_r.jpeg", 
-       plot = gg_cond_r, width = 10, height = 8)
+       plot = gg_cond_r, width = 5, height = 4)
 
 gg_regpath <- ggplot()
 for(i in 1:ncol(reg_path$varImp_path)){
   gg_regpath <- gg_regpath + geom_line(data = data.frame(x = reg_path$cp, 
     y = reg_path$varImp_path[, i]), aes(x = x, y = y), 
-    col = if(i %in% data$j)'#d11010' else 'grey')
+    col = if(i %in% data$j)'#d11010' else 'grey', 
+    linewidth = if(i %in% data$j) 0.7 else 0.2)
 }
 gg_regpath <- gg_regpath + theme_bw() + xlab('') + 
   ylab('Variable importance') + ggtitle('Variable importance path') +
-  xlim(0, 0.4) + geom_point(aes(x = 1, y = 0, col = "red")) +
+  xlim(0, 0.4) + geom_line(aes(x = 1, y = 0, col = '#d11010'), linewidth = 0.7) +
+  geom_line(aes(x = 1, y = 0, col = 'grey'), linewidth = 0.2) +
   ggplot2::labs(col = "") + 
-  ggplot2::scale_color_manual(values = c("red"), labels = c("causal parents     "))
+  ggplot2::scale_color_manual(values = c('#d11010', 'grey'), 
+                              labels = c("causal \nparents     ", 'other \nvariables'))
 
 gg_stablepath <- ggplot()
 for(i in 1:ncol(stable_path$varImp_path)){
   gg_stablepath <- gg_stablepath + geom_line(data = data.frame(x = stable_path$cp, 
     y = stable_path$varImp_path[, i]), aes(x = x, y = y), 
-    col = if(i %in% data$j)'#d11010' else 'grey')
+    col = if(i %in% data$j)'#d11010' else 'grey', 
+    linewidth = if(i %in% data$j) 0.7 else 0.2)
 }
 gg_stablepath <- gg_stablepath + theme_bw() + xlab('') + 
   ylab(expression(Pi)) + ggtitle('Stability selection path') +
-  xlim(0, 0.4) + geom_point(aes(x = 1, y = 0, col = "red")) +
+  xlim(0, 0.4) + geom_line(aes(x = 1, y = 0, col = '#d11010'), linewidth = 0.7) +
   ggplot2::labs(col = "") + 
-  ggplot2::scale_color_manual(values = c("red"), labels = c("causal parents    "))
+  ggplot2::scale_color_manual(values = c('#d11010', 'grey'), 
+                              labels = c("causal \nparents    ", 'other \nvariables'))
 
 gg_paths <- grid_arrange_shared_legend(gg_regpath, gg_stablepath, ncol = 2, 
                                        bottom = 'Regularization: cp', 

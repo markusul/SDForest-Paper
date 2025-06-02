@@ -10,7 +10,7 @@ mc.cores <- 100
 
 simulate_nonlinear_confounding <- function(q, p, n, m, df){
   H <- matrix(rnorm(n*q), ncol=q)
-  complexity_H <- 12
+  complexity_H <- df
   
   X <- sapply(1:p, function(j){
     beta_H <- runif(q * complexity_H * 2, -1, 1)
@@ -38,7 +38,7 @@ set.seed(42)
 p <- 300
 q <- 1
 n <- 500
-df <- 4
+df <- 12
 m <- 1
 
 dat <- simulate_nonlinear_confounding(q = q, p = p, n = n, m = m, df = df)
@@ -51,6 +51,7 @@ js <- dat$j
 Q <- get_Q(X, 'trim')
 d <- svd(X)$d
 sing <- data.frame(d, i = 1:p)
+plot(sing)
 
 # transformed response and f(X)
 df <- data.frame(f = f_X, Y, QY = Q %*% Y, Qf = Q %*% f_X)
@@ -64,7 +65,7 @@ dep2 <- partDependence(fit2, js[1], mc.cores = mc.cores)
 # Quantitative performance comparison
 
 performance_measure <- function(n, p, q, n_test){
-  data <- simulate_nonlinear_confounding(q = q, p = p, n = n+n_test, m = 4, df = 4)
+  data <- simulate_nonlinear_confounding(q = q, p = p, n = n+n_test, m = 4, df = 12)
   data_train <- data.frame(data$X[1:n,], Y = data$Y[1:n])
   data_test <- data.frame(data$X[(n+1):(n+n_test),], Y = data$Y[(n+1):(n+n_test)])
   

@@ -127,6 +127,34 @@ transformed <- ggplot(df, aes(y = Qf, x = QY)) +
 
 pt <- grid.arrange(plain, transformed, ncol = 2)
 ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 10, height = 4)
+
+# show shrinkage of singular values
+set.seed(22)
+q = 20
+dat <- simulate_data_nonlinear(q = q, p = 100, n = 1000, m = 4) 
+X <- scale(dat$X)
+
+d <- svd(X)$d
+
+QTrim <- get_Q(X, type = 'trim', scaling = F)
+dTrim <- svd(QTrim %*% X)$d
+
+QPCA <- get_Q(X, type = 'pca', scaling = F, q_hat = q)
+dPCA <- svd(QPCA %*% X)$d
+dPCA <- c(rep(0, q), dPCA[1:(length(dPCA)-q)])
+
+sigma_dat <- data.frame(sigma = c(d, dTrim, dPCA), 
+                        method = rep(c('no', 'trim', 'pca'), each = length(d)), 
+                        index = rep(1:length(d), 3))
+
+ggsig <- ggplot(sigma_dat, aes(y = sigma, x = index, col = method, shape = method)) + 
+  geom_point(size = 0.7) + theme_bw() + 
+  ylab('transformed singular values')
+  
+ggsig
+ggsave(filename = "simulation_study/figures/sig.jpeg", plot = ggsig, width = 6, height = 4)
+
+
 ##### default experiment #####
 
 load('simulation_study/results/default_szenario.RData')

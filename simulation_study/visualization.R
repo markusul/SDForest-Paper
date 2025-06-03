@@ -635,22 +635,29 @@ ggsave(filename = "simulation_study/figures_nl/perf_nl.jpeg", plot = gg_perf, wi
 load('simulation_study/results/nonlin_confounding_2.RData')
 
 gg_sing <- ggplot(sing, aes(x = i, y = d)) + 
-  geom_point(aes()) + ylab(expression(lambda[i])) + 
-  theme_bw()
+  geom_point(size = 0.7) +
+  theme_bw() + 
+  ylab("singular values") + 
+  xlab("index")
 gg_sing
-ggsave(filename = "simulation_study/figures_nl/sing2.jpeg", plot = gg_sing, width = 7, height = 3)
+ggsave(filename = "simulation_study/figures_nl/sing2.jpeg", plot = gg_sing, width = 6, height = 4)
 
 
 plain <- ggplot(df, aes(y = f, x = Y)) + 
-  geom_point(size = 0.4) + theme_bw() + 
-  ylab("f(X)")
+  geom_point(size = 0.2) + theme_bw() + 
+  ylab("f(X)") + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
+  ylim(-1.5, 0.8) + xlim(-7, 7)
 
 transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
-  geom_point(size = 0.4) + theme_bw() + 
-  ylab("Qf(X)")
+  geom_point(size = 0.2) + theme_bw() + 
+  ylab("Qf(X)") + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
+  ylim(-1.5, 0.8) + xlim(-7, 7)
 
-pt <- grid.arrange(plain, transformed)
-ggsave(filename = "simulation_study/figures_nl/pt_nl2.jpeg", plot = pt, width = 5, height = 10)
+pt <- grid.arrange(plain, transformed, ncol = 2)
+ggsave(filename = "simulation_study/figures_nl/pt_nl2.jpeg", plot = pt, width = 10, height = 4)
+
 
 # Comparison of Variable importance
 imp_1 <- fit$var_importance / max(fit$var_importance)
@@ -675,6 +682,7 @@ gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
                                      bottom = 'Variable importance SDForest')
 ggsave(filename = "simulation_study/figures_nl/imp_nl2.jpeg", plot = gg_imp, width = 10, height = 4)
 
+set.seed(22)
 gg_dep <- plot(dep) + geom_point(aes(x = X[, js[1]], y = Y), size = 0.2)
 
 sample_examples <- sample(1:ncol(dep2$preds), 19)
@@ -690,13 +698,23 @@ gg_dep <- gg_dep +
   ggplot2::scale_color_manual(values = c(true = "red", rf = "blue"), 
                               labels = c(true = "True Function", 
                                          rf = "no deconfounding")) +
-  theme(legend.position = 'bottom') + 
-  xlim(c(-5, 5))
+  theme(legend.position = 'bottom')
 gg_dep
-ggsave(filename = "simulation_study/figures_nl/dep_nl2.jpeg", plot = gg_dep, width = 5, height = 5)
+
+set.seed(22)
+gg_dep <- plot(dep) + geom_point(aes(x = X[, js[1]], y = Y), size = 0.2)
+gg_dep <- gg_dep + 
+  geom_line(aes(x = X[, js[1]], y = f_X, col = 'true'), 
+            linetype = 2, linewidth = 0.2) +   
+  ggplot2::labs(col = "") + 
+  ggplot2::scale_color_manual(values = c(true = "red"), 
+                              labels = c(true = "True Function")) +
+  theme(legend.position = 'bottom')
+gg_dep
+ggsave(filename = "simulation_study/figures_nl/dep_nl2.jpeg", plot = gg_dep, width = 6, height = 4)
 
 
-gg_perf <- ggplot(perf_g, aes(y = performance, x = method, fill = method)) +
+gg_perf <- ggplot(perf_g, aes(y = performance, x = method, color = method)) +
   geom_boxplot(outlier.size = 0.4) + theme_bw() + 
   scale_fill_tron() + ylab(error_name) + xlab('') +
   theme(legend.position = 'None')

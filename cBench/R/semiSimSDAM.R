@@ -1,7 +1,4 @@
-args = commandArgs(trailingOnly = TRUE)
-
-args <- c(1, 1)
-set.seed(as.numeric(args[2]))
+set.seed(22)
 
 library(reticulate)
 library(SDModels)
@@ -35,36 +32,23 @@ Gamma <- matrix(rnorm(p*q), nrow = q)
 delta <- matrix(rnorm(q), nrow = q)
 H <- matrix(rnorm(q*n), nrow = n)
 
+# without confounding
+dat0 <- data.frame(Y, X)
+
 # confounding strength
-tau_seq <- seq(0, 1, 0.1)
-tau <- tau_seq[as.numeric(args[1])]
+tau <- 1
 
 Y_prime <- Y + H %*% delta * tau
 X_prime <- X + H %*% Gamma * tau
 
 dat <- data.frame(Y_prime, X_prime)
 
-# prepare cross validation
-ind <- sample(1:n)
-preds_SDAM <- rep(NA, n)
-
-#5 fold train/test split
-folds <- split(ind, cut(seq_along(ind), breaks = 5, labels = FALSE))
-
-for(test in folds) {
-    fit <- lm(Y_prime ~ ., data = dat[-test, ])
-    preds_SDAM[test] <- predict(fit, newdata = dat[test, ])
-}
-plot(Y_prime, preds_SDAM)
-
-# classical random forest fit
-fitTau <- ranger(y = Y_prime, x = X_prime)
-preds_plain <- fitTau$predictions
-
-# deconfounded random forest fit
-fitTau <- SDForest(y = Y_prime, x = X_prime, nTree = 500, 
-                   max_size = 1000, mc.cores = 100)
-preds_sdf <- fitTau$oob_predictions
+# fit SDAM
+fit <- SDAM(Y ~ ., data = dat0, mc.cores = 20)
+predsSDAM0 <- predict(fit, dat0)
+fit <- NULL
+fit <- SDAM(Y_prime ~ ., data = dat, mc.cores = 20)
+predsSDAM <- predict(fit, dat)
 
 print("save")
-save(preds_plain, preds_sdf, tau, file = paste0("cBench/semiSimResults/predRob_", args[2], "_", args[1], ".RData"))
+save(predsSDAM0, predsSDAM, file = paste0("cBench/semiSimResults/predSDAM.RData"))

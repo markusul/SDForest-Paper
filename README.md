@@ -7,7 +7,7 @@ providing functionality to estimate SDForests and analyze the estimated function
 You can download this version from cran with `devtools::install_version("SDModels", version = "1.0.7", repos = "http://cran.us.r-project.org")`.
 
 All the simulations were run on the [*Euler*](https://scicomp.ethz.ch/wiki/Euler) using the batch jobs in the 
-`slurm` folder. See [*here*](https://scicomp.ethz.ch/wiki/Euler_applications_and_libraries_ubuntu) for details about the used libraries.
+`slurm` folder. See [*here*](https://scicomp.ethz.ch/wiki/Euler_applications_and_libraries_ubuntu) and sessionInfo.txt for details about the used libraries.
 
 The experiments will need the folders `simulation_study/results` and `cBench/semiSimResults` to save their output.
 

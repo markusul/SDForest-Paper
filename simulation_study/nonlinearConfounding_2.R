@@ -25,11 +25,13 @@ simulate_nonlinear_confounding <- function(q, p, n, m, df){
   js <- sample(1:p, m)
 
   # random coefficient vector delta
-  delta <- rnorm(q, 0, 2)
+  delta <- runif(q * complexity_H * 2, -2, 2)
+  H_js <- 1:q
 
   # generate f_X
   f_X <- apply(X, 1, function(x) f_four(x, beta, js))
-  Y <- f_X + H %*% delta + rnorm(n, 0, 0.01)
+  f_H <- apply(H, 1, function(x) f_four(x, delta, H_js))
+  Y <- f_X + f_H + rnorm(n, 0, 0.01)
   return(list(X = X, Y = Y, f_X = f_X, j = js, H = H))
 }
 
@@ -51,7 +53,6 @@ js <- dat$j
 Q <- get_Q(X, 'trim')
 d <- svd(X)$d
 sing <- data.frame(d, i = 1:p)
-plot(sing)
 
 # transformed response and f(X)
 df <- data.frame(f = f_X, Y, QY = Q %*% Y, Qf = Q %*% f_X)

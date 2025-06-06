@@ -22,3 +22,4 @@ Reproducing the different figures.
 - Figure 3-6 run simulation_study/default_szenario.R
 - Figure 7 run slurm/dimensions.sh
 - Figure 8 run slurm/semiSim.sh
+- Non-linear confounding run simulation_study/nonlinearConfounding_2.R

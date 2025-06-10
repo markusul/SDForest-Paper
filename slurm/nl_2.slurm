@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --time=350:00:00
+#SBATCH --time=50:00:00
 #SBATCH --job-name="nl"
-#SBATCH --mem-per-cpu=7GB
+#SBATCH --mem-per-cpu=4GB
 #SBATCH --output=outfiles/nl.out
 #SBATCH --cpus-per-task=100
 

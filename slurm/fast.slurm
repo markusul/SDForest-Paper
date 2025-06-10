@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=350:00:00
+#SBATCH --time=50:00:00
 #SBATCH --job-name="fast"
 #SBATCH --mem-per-cpu=1GB
 #SBATCH --output=outfiles/fast.out

@@ -45,9 +45,11 @@ dat <- data.frame(Y_prime, X_prime)
 
 # fit SDAM
 fit <- SDAM(Y ~ ., data = dat0, mc.cores = 20)
+print(fit)
 predsSDAM0 <- predict(fit, dat0)
 fit <- NULL
 fit <- SDAM(Y_prime ~ ., data = dat, mc.cores = 20)
+print(fit)
 predsSDAM <- predict(fit, dat)
 
 print("save")

@@ -107,6 +107,13 @@ load(paste0(path, "predRob_1_1.RData"))
 diff_rangerSDF <- mean((preds_plain - preds_sdf)**2)
 diff_rangerSDF
 
+# diff to SDAM
+load(paste0(path, "predSDAM.RData"))
+
+plot(preds_sdf, predsSDAM)
+predsSDAM
+
+
 # change in predictions
 gg_rob <- ggplot(semiDat, aes(x = tau, y = rob, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 

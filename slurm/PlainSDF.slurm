@@ -10,4 +10,4 @@ module load r/4.4.0
 module load python/3.11.6
 export OMP_NUM_THREADS=1
 
-Rscript --vanilla simulation_study/default_szenario.R
+Rscript --vanilla cBench/R/PlainSDF.R

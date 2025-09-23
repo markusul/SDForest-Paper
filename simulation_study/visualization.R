@@ -60,7 +60,7 @@ predict.true_function <- function(object, newdata){
 }
 
 plotDep <- function(object, n_examples = 19){
-  ggdep <- ggplot2::ggplot() + ggplot2::theme_bw()
+  ggdep <- ggplot2::ggplot()
   preds <- object$preds
   x_seq <- object$x_seq
   
@@ -96,6 +96,7 @@ predict.ranger_fun <- function(object, newdata){
 library(SDModels)
 library(gridExtra)
 library(ggplot2)
+theme_set(theme_bw(base_size = 14))
 library(ranger)
 library(ggsci)
 library(ggpubr)
@@ -114,19 +115,19 @@ Qf <- Q %*% f
 df <- data.frame(f, Y, QY, Qf)
 
 plain <- ggplot(df, aes(y = f, x = Y)) + 
-  geom_point(size = 0.2) + theme_bw() + 
+  geom_point(size = 0.2) + 
   ylab("f(X)") + 
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
-  ylim(-4, 4) + xlim(-10, 10)
+  ylim(-5, 5) + xlim(-20, 20)
 
 transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
-  geom_point(size = 0.2) + theme_bw() + 
+  geom_point(size = 0.2) + 
   ylab("Qf(X)") + 
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
-  ylim(-4, 4) + xlim(-10, 10)
+  ylim(-5, 5) + xlim(-20, 20)
 
 pt <- grid.arrange(plain, transformed, ncol = 2)
-ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 10, height = 4)
+ggsave(filename = "simulation_study/figures/pt.jpeg", plot = pt, width = 7, height = 3)
 
 # show shrinkage of singular values
 set.seed(22)
@@ -148,11 +149,11 @@ sigma_dat <- data.frame(sigma = c(d, dTrim, dPCA),
                         index = rep(1:length(d), 3))
 
 ggsig <- ggplot(sigma_dat, aes(y = sigma, x = index, col = method, shape = method)) + 
-  geom_point(size = 0.7) + theme_bw() + 
+  geom_point(size = 0.7) + 
   ylab('transformed singular values')
   
 ggsig
-ggsave(filename = "simulation_study/figures/sig.jpeg", plot = ggsig, width = 6, height = 4)
+ggsave(filename = "simulation_study/figures/sig.jpeg", plot = ggsig, width = 7, height = 3)
 
 
 ##### default experiment #####
@@ -195,13 +196,13 @@ imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_
 
 ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, 
                               col = Covariates, shape = Covariates)) + 
-  geom_point(size = 0.7) + theme_bw() + xlab('') + 
+  geom_point(size = 0.7) + xlab('') + 
   ylab('') + scale_color_tron() + ggtitle('Normalized to [0, 1]') + 
   theme(legend.title = element_blank())
 
 ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), 
                                   col = Covariates, shape = Covariates)) + 
-  geom_point(size = 0.7) + theme_bw() + xlab('') + 
+  geom_point(size = 0.7) + xlab('') + 
   ylab('') + scale_color_tron() + ggtitle('Logarithmic scale') + 
   theme(legend.title = element_blank())
 
@@ -209,14 +210,14 @@ gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
                            left = 'Variable importance ranger', 
                            bottom = 'Variable importance SDForest')
 
-ggsave(filename = "simulation_study/figures/imp.jpeg", plot = gg_imp, width = 10, height = 4)
+ggsave(filename = "simulation_study/figures/imp.jpeg", plot = gg_imp, width = 8, height = 4)
 
 ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), 
                                   col = Covariates, shape = Covariates)) + 
-  geom_point(size = 0.7) + theme_bw() + xlab('log Variable importance SDForest') + 
+  geom_point(size = 0.7) + xlab('log Variable importance SDForest') + 
   ylab('log Variable importance ranger') + scale_color_tron() + 
   theme(legend.title = element_blank(), legend.position = "inside",
-        legend.position.inside=c(0.85,0.9)) + 
+        legend.position.inside=c(0.8,0.8)) + 
   scale_shape_manual(values=c(3, 16))
 ggimp_log
 ggsave(filename = "simulation_study/figures/imp_log.jpeg", plot = ggimp_log, width = 5, height = 4)
@@ -284,7 +285,7 @@ ggdep4_r <- plotDep(dep_r_4) +
 gg_cond_r <- grid_arrange_shared_legend(ggdep1_r, ggdep2_r, ggdep3_r, ggdep4_r,
                                          ncol = 2, nrow = 2, left = 'f(X)')
 ggsave(filename = "simulation_study/figures/cond_r.jpeg", 
-       plot = gg_cond_r, width = 5, height = 4)
+       plot = gg_cond_r, width = 3.5, height = 4)
 
 gg_regpath <- ggplot()
 for(i in 1:ncol(reg_path$varImp_path)){
@@ -293,7 +294,7 @@ for(i in 1:ncol(reg_path$varImp_path)){
     col = if(i %in% data$j)'#d11010' else 'grey', 
     linewidth = if(i %in% data$j) 0.7 else 0.2)
 }
-gg_regpath <- gg_regpath + theme_bw() + xlab('') + 
+gg_regpath <- gg_regpath + xlab('') + 
   ylab('Variable importance') + ggtitle('Variable importance path') +
   xlim(0, 0.4) + geom_line(aes(x = 1, y = 0, col = '#d11010'), linewidth = 0.7) +
   geom_line(aes(x = 1, y = 0, col = 'grey'), linewidth = 0.2) +
@@ -308,7 +309,7 @@ for(i in 1:ncol(stable_path$varImp_path)){
     col = if(i %in% data$j)'#d11010' else 'grey', 
     linewidth = if(i %in% data$j) 0.7 else 0.2)
 }
-gg_stablepath <- gg_stablepath + theme_bw() + xlab('') + 
+gg_stablepath <- gg_stablepath + xlab('') + 
   ylab(expression(Pi)) + ggtitle('Stability selection path') +
   xlim(0, 0.4) + geom_line(aes(x = 1, y = 0, col = '#d11010'), linewidth = 0.7) +
   ggplot2::labs(col = "") + 
@@ -320,7 +321,7 @@ gg_paths <- grid_arrange_shared_legend(gg_regpath, gg_stablepath, ncol = 2,
                                        position = 'right')
 
 ggsave(filename = "simulation_study/figures/paths.jpeg", 
-       plot = gg_paths, width = 10, height = 4)
+       plot = gg_paths, width = 9, height = 5)
 
 ##### Performance depending on the dimensions #####
 error_name <- expression("||"*f^0*(x[test]) - hat(f)(x[test])*"||"[2]^2 / n[test])
@@ -352,7 +353,7 @@ perf_n <- lapply(paste0('simulation_study/results/perf_n/', files),
 perf_n <- do.call(rbind, perf_n)
 
 gg_n <- ggplot(perf_n, aes(x = seq, y = error, color = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of training samples') + 
+  geom_boxplot(outlier.size = 0.4) + xlab('Number of training samples') + 
   ylab('') + scale_color_tron() + theme(legend.title=element_blank())
   
 gg_n <- gg_n + annotate(geom = "text", label = 'a)', 
@@ -370,7 +371,7 @@ perf_p <- lapply(paste0('simulation_study/results/perf_p/', files),
 perf_p <- do.call(rbind, perf_p)
 
 gg_p <- ggplot(perf_p, aes(x = seq, y = error, color = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of covariates') + 
+  geom_boxplot(outlier.size = 0.4) + xlab('Number of covariates') + 
   ylab('') + scale_color_tron() + theme(legend.title=element_blank())
 
 gg_p <- gg_p + annotate(geom = "text", label = 'b)', 
@@ -388,7 +389,7 @@ perf_q <- lapply(paste0('simulation_study/results/perf_q/', files),
 perf_q <- do.call(rbind, perf_q)
 
 gg_q <- ggplot(perf_q, aes(x = seq, y = error, color = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab('Number of confounders') + 
+  geom_boxplot(outlier.size = 0.4) + xlab('Number of confounders') + 
   ylab('') + scale_color_tron() + theme(legend.title=element_blank())
 
 gg_q <- gg_q + annotate(geom = "text", label = 'c)', 
@@ -407,7 +408,7 @@ perf_eff <- lapply(paste0('simulation_study/results/perf_eff/', files),
 perf_eff <- do.call(rbind, perf_eff)
 
 gg_eff <- ggplot(perf_eff, aes(x = seq, y = error, color = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("Number of affected covariates") + 
+  geom_boxplot(outlier.size = 0.4) + xlab("Number of affected covariates") + 
   ylab('') + scale_color_tron() + theme(legend.title=element_blank())
 
 gg_eff <- gg_eff + annotate(geom = "text", label = 'd)', 
@@ -437,7 +438,7 @@ perf_dim$seq <- factor(perf_dim$seq, order = TRUE,
 perf_dim$dim <- factor(perf_dim$dim, ordered = T, levels = dim_names)
 
 gg_dims2 <- ggplot(perf_dim, aes(x = seq, y = error, color = method)) + 
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + xlab("") + 
+  geom_boxplot(outlier.size = 0.4) + xlab("") + 
   ylab(error_name) + scale_color_tron() + facet_wrap(~dim, ncol = 2, scales="free") + 
   theme(legend.position = 'bottom', legend.title = element_blank())
 
@@ -463,27 +464,26 @@ load('simulation_study/results/nonlin_confounding_2.RData')
 
 gg_sing <- ggplot(sing, aes(x = i, y = d)) + 
   geom_point(size = 0.7) +
-  theme_bw() + 
   ylab("singular values") + 
   xlab("index")
 gg_sing
-ggsave(filename = "simulation_study/figures_nl/sing2.jpeg", plot = gg_sing, width = 6, height = 4)
+ggsave(filename = "simulation_study/figures_nl/sing2.jpeg", plot = gg_sing, width = 7, height = 3)
 
 
 plain <- ggplot(df, aes(y = f, x = Y)) + 
-  geom_point(size = 0.2) + theme_bw() + 
+  geom_point(size = 0.2) +
   ylab("f(X)") + 
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
   ylim(-1.5, 0.8) + xlim(-7, 7)
 
 transformed <- ggplot(df, aes(y = Qf, x = QY)) + 
-  geom_point(size = 0.2) + theme_bw() + 
+  geom_point(size = 0.2) +
   ylab("Qf(X)") + 
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") + 
   ylim(-1.5, 0.8) + xlim(-7, 7)
 
 pt <- grid.arrange(plain, transformed, ncol = 2)
-ggsave(filename = "simulation_study/figures_nl/pt_nl2.jpeg", plot = pt, width = 10, height = 4)
+ggsave(filename = "simulation_study/figures_nl/pt_nl2.jpeg", plot = pt, width = 7, height = 3)
 
 
 # Comparison of Variable importance
@@ -495,19 +495,19 @@ true_imp[js] <- 'causal'
 imp_data <- data.frame(SDF = imp_1, ranger = imp_2, Covariates = as.factor(true_imp))
 
 ggimp <- ggplot(imp_data, aes(x = SDF, y = ranger, col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('') + 
+  geom_point(size = 0.5) + xlab('') + 
   ylab('') + scale_color_tron() + ggtitle('Normalized to [0, 1]') + 
   theme(legend.title = element_blank())
 
 ggimp_log <- ggplot(imp_data, aes(x = log(SDF), y = log(ranger), col = Covariates)) + 
-  geom_point(size = 0.5) + theme_bw() + xlab('') + 
+  geom_point(size = 0.5) + xlab('') + 
   ylab('') + scale_color_tron() + ggtitle('Logarithmic scale') + 
   theme(legend.title = element_blank())
 
 gg_imp <- grid_arrange_shared_legend(ggimp, ggimp_log, position = 'right',
                                      left = 'Variable importance ranger', 
                                      bottom = 'Variable importance SDForest')
-ggsave(filename = "simulation_study/figures_nl/imp_nl2.jpeg", plot = gg_imp, width = 10, height = 4)
+ggsave(filename = "simulation_study/figures_nl/imp_nl2.jpeg", plot = gg_imp, width = 8, height = 4)
 
 set.seed(22)
 gg_dep <- plot(dep) + geom_point(aes(x = X[, js[1]], y = Y), size = 0.2)
@@ -538,25 +538,25 @@ gg_dep <- gg_dep +
                               labels = c(true = "True Function")) +
   theme(legend.position = 'bottom')
 gg_dep
-ggsave(filename = "simulation_study/figures_nl/dep_nl2.jpeg", plot = gg_dep, width = 6, height = 4)
+ggsave(filename = "simulation_study/figures_nl/dep_nl2.jpeg", plot = gg_dep, width = 7, height = 4)
 
 
 gg_perf <- ggplot(perf_g, aes(y = performance, x = method, color = method)) +
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + 
+  geom_boxplot(outlier.size = 0.4) +
   scale_fill_tron() + ylab(error_name) + xlab('') +
   theme(legend.position = 'None')
 
 gg_perf
-ggsave(filename = "simulation_study/figures_nl/perf_nl2.jpeg", plot = gg_perf, width = 5, height = 5)
+ggsave(filename = "simulation_study/figures_nl/perf_nl2.jpeg", plot = gg_perf, width = 3.5, height = 3)
 
 
 #### fast comparison ####
 load('simulation_study/results/fast.RData')
 
 gg_perf <- ggplot(perf_g, aes(y = performance, x = method, color = method)) +
-  geom_boxplot(outlier.size = 0.4) + theme_bw() + 
+  geom_boxplot(outlier.size = 0.4) + 
   scale_color_tron() + ylab(error_name) + xlab('') +
   theme(legend.position = 'None')
 
 gg_perf
-ggsave(filename = "simulation_study/figures/perf_fast.jpeg", plot = gg_perf, width = 5, height = 5)
+ggsave(filename = "simulation_study/figures/perf_fast.jpeg", plot = gg_perf, width = 3.5, height = 3)

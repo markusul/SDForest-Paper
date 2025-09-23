@@ -1,4 +1,5 @@
 library(ggplot2)
+theme_set(theme_bw(base_size = 14))
 library(ggsci)
 
 require(grid)
@@ -51,6 +52,28 @@ grid_arrange_shared_legend <-
     invisible(combined)
     
   }
+
+library(reticulate)
+library(SDModels)
+library(ranger)
+np <- import("numpy")
+
+# load data
+npz1 <- np$load("cBench/data/dataset_rpe1_filtered.npz")
+interventions <- npz1$f[['interventions']]
+
+# environments
+table(interventions)
+
+# set response variable as in DRIG
+response <- "ENSG00000173812"
+
+# only use observational data
+env <- 'non-targeting'
+
+X <- npz1$f[['expression_matrix']]
+colnames(X) <- npz1$f[['var_names']]
+Y <- X[interventions == env, response]
 
 path <- "cBench/semiSimResults/"
 
@@ -117,39 +140,37 @@ predsSDAM
 # change in predictions
 gg_rob <- ggplot(semiDat, aes(x = tau, y = rob, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
-  theme_bw() +
   ylab("function change") + 
   scale_color_tron() +
   geom_boxplot(aes(x = "0", y = diff_rangerSDF, col = 'SDF - ranger')) +
   theme(legend.title = element_blank())
 gg_rob
 ggsave(filename = "simulation_study/figures/SemiSim_rob.jpeg", 
-       plot = gg_rob, width = 6, height = 4)
+       plot = gg_rob, width = 7, height = 3)
 
 # log change in predictions
 gg_rob_log <- ggplot(semiDat, aes(x = tau, y = log(rob), col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
-  theme_bw() +
   ylab("log function change") + 
   scale_color_tron() +
   geom_boxplot(aes(x = "0", y = log(diff_rangerSDF), col = 'SDF - ranger')) +
   theme(legend.title = element_blank())
 gg_rob_log
 ggsave(filename = "simulation_study/figures/SemiSim_rob_log.jpeg", 
-       plot = gg_rob_log, width = 6, height = 4)
+       plot = gg_rob_log, width = 7, height = 3)
 
 # change in MSE
 gg_perf <- ggplot(semiDat, aes(x = tau, y = perf, col = method)) +
   geom_boxplot(outlier.size = 0.4) + 
   ylim(0, 1) + 
-  theme_bw() +
   ylab("performance") + 
   scale_color_tron() +
   theme(legend.title = element_blank())
+gg_perf
 
-gg_semiSim <- grid_arrange_shared_legend(gg_rob, gg_rob_log, ncol = 2)
+gg_semiSim <- grid_arrange_shared_legend(gg_rob, gg_perf, ncol = 2)
 ggsave(filename = "simulation_study/figures/SemiSim.jpeg", 
-       plot = gg_semiSim, width = 10, height = 4)
+       plot = gg_semiSim, width = 7, height = 4)
 
 
 # performance with tau = 0

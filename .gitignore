@@ -5,7 +5,7 @@
 /motif/results
 /cBench/data
 /cBench/results*
-/cBench/semiSimResults
+/cBench/semiSimResults*
 
 # History files
 .Rhistory

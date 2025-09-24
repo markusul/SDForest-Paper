@@ -41,8 +41,11 @@ Y_prime <- Y + H %*% delta * tau
 X_prime <- X + H %*% Gamma * tau
 
 # classical random forest fit
-fitTau <- ranger(y = Y_prime, x = X_prime)
+fitTau <- ranger(y = Y_prime, x = X_prime, 
+                 mtry = floor(0.5 * ncol(X_prime)),
+                 sample.fraction = 1000/nrow(X_prime))
 preds_plain <- fitTau$predictions
+
 
 # deconfounded random forest fit
 fitTau <- SDForest(y = Y_prime, x = X_prime, nTree = 500, 

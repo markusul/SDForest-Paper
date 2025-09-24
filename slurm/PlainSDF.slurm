@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=10:00:00
 #SBATCH --job-name="PlainSDF"
-#SBATCH --mem-per-cpu=2GB
+#SBATCH --mem-per-cpu=6GB
 #SBATCH --output=outfiles/PlainSDF.out
 #SBATCH --cpus-per-task=100
 

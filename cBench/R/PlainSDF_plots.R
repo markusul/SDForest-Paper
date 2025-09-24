@@ -29,8 +29,8 @@ sig$index <- 1:nrow(sig)
 
 ggsig <- ggplot(sig, aes(y = d, x = index))+
   geom_point(size = 0.1) + 
-  geom_abline(intercept = lim, slope = 0, lty = 2) + 
-  ylab('singular values') + 
+  #geom_abline(intercept = lim, slope = 0, lty = 2) + 
+  ylab('singular values') +
   xlim(1, max(sig$index) + 6)
 
 ggsig

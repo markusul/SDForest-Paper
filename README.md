@@ -1,6 +1,6 @@
 # Spectrally Deconfounded Random Forests
 
-This repository contains all the code used for the paper "[*Spectrally Deconfounded Random Forests*](https://arxiv.org/abs/2502.03969)" by Markus Ulmer, Cyrill Scheidegger, and Peter Bühlmann (2025).
+This repository contains all the code used for the paper "[*Spectrally Deconfounded Random Forests*](https://doi.org/10.1080/10618600.2025.2569602)" by Markus Ulmer, Cyrill Scheidegger, and Peter Bühlmann (2025).
 
 All the provided R-code uses the R-package [*SDModels*](https://markusul.github.io/SDModels/) v1.0.13, 
 providing functionality to estimate SDForests and analyze the estimated functions. 

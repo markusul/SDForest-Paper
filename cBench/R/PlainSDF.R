@@ -21,19 +21,37 @@ colnames(X) <- npz1$f[['var_names']]
 Y <- X[interventions == env, response]
 X <- X[interventions == env, -which(colnames(X) == response)]
 
+start.time <- Sys.time()
+
 # classical random forest fit
-fit_plain <- ranger(y = Y, x = X, importance = "impurity")
-preds_plain <- fit_plain$predictions
-imp_plain <- fit_plain$variable.importance
+fit_ranger <- ranger(y = Y, x = X, importance = "impurity", 
+                     mtry = floor(0.5 * ncol(X)),
+                     sample.fraction = 1000/nrow(X))
+preds_ranger <- fit_ranger$predictions
+imp_ranger <- fit_ranger$variable.importance
+save(preds_ranger, imp_ranger, file = paste0("cBench/semiSimResults/resRanger.RData"))
+print(Sys.time() - start.time)
+
+fit <- SDForest(y = Y, x = X, nTree = 500, 
+                   max_size = 1000, mc.cores = 100, 
+                   Q_type = "no_deconfounding")
+preds_plain <- fit$oob_predictions
+imp_plain <- fit$var_importance
+
+fit <- NULL
+gc()
+print(Sys.time() - start.time)
 
 # deconfounded random forest fit
-fit_sdf <- SDForest(y = Y, x = X, nTree = 500, 
+fit <- SDForest(y = Y, x = X, nTree = 500, 
                    max_size = 1000, mc.cores = 100)
-preds_sdf <- fit_sdf$oob_predictions
-imp_sdf <- fit_sdf$var_importance
+preds_sdf <- fit$oob_predictions
+imp_sdf <- fit$var_importance
 
+print(Sys.time() - start.time)
 print("save")
 save(preds_plain, preds_sdf, imp_plain, imp_sdf, file = paste0("cBench/semiSimResults/PlainSDF.RData"))
+
 
 
 
